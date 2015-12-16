@@ -5,30 +5,36 @@
 
 ### 処理の流れ
 
-1. 特定の画像保存用ディレクトリに保存された画像を随時チェックし、もしファイルが追加されていれば特徴量抽出プログラムにそのファイルを引数の1つとして渡して実行し、特徴量のデータを保存する。
-2. 1.で保存されたデータから特徴量をserver4recog(認識用プログラム)にHTTPで送信し、認識結果を得る。
-3. 2.で得た認識結果をHTTPでCHIFFONに送信する。
+1. 設定ファイル(`chiffon\_client.yaml`)の読み込み
+2. `user\_id`を基にCHIFFONサーバから`session\_id`,`recipe\_id`を取得
+(設定ファイル(`{output\_dir}/{session\_ids[0]}/{PUT,TAKEN}`)の読み込み？)
+3. 画像保存用ディレクトリを作成
+4. TableObjectManagerを起動
+5. 特定の画像保存用ディレクトリに保存された画像を随時チェック
+6. 特徴抽出用プログラムに保存された画像を渡し、特徴量を保存する。
+7. 6.で保存されたデータから特徴量をserver4recog(認識用プログラム)にHTTPで送信し、認識結果を得る。
+8. 7.で得た認識結果をHTTPでCHIFFONに送信する。
 
 ### 関連ファイル
 
-* batch\_navi\_client.py
-    * 一連の処理を行うスクリプト(python)
-* config.yaml
-    * 各種設定を記述したyamlファイル
+* chiffon\_client.py
+    * 一連の処理を行うPythonスクリプトファイル
+* chiffon\_client.conf
+    * 各種設定を記述したconfファイル
 
 ### 引数
 
 スクリプトは以下の様に引数を指定して起動する。
 
 ```
-python batch\_navi\_client.py \[usrername\] \[grouptag ...\]
+python chiffon\_cient.py \[user\_id\] \[grouptag ...\]
 ```
 
 指定する引数は以下の通り。
 
-* username
+* user\_id
     * ユーザー名
-* groupname
+* grouptag
     * server4recogへ渡すサンプルに付加するグループタグ
     * 複数指定可能
 	    * 但し最低1つは必要
@@ -37,65 +43,74 @@ python batch\_navi\_client.py \[usrername\] \[grouptag ...\]
 ### 設定ファイルの記述
 
 ```
-\# 抽出した特徴量の保存先
-filepath\_ext: /path/to/feature
-\# 画像の保存ディレクトリ
-dir\_check: /path/to/TOUCH
-\# 特徴量抽出プログラムのパス
-exe\_featurek: /path/to/exe
-\# 各接続先(server4recog,CHIFFON)のIPアドレス,ポート番号
-ip\_recog: 10.236.170.190
-port\_recog: 8080
-ip\_chiffon: 133.3.251.221
-port\_chiffon: 8080
+[chiffon\_client]
+\# chiffon_clientが利用する全保存先ディレクトリのroot
+output\_root=/path/to/root
+[table\_object\_manager]
+\# TableObjectManagerによる出力のディレクトリ
+output\_touch: table\_object\_manager/PUT
+output\_release: table\_object\_manager/TAKEN
+[image\_feature\_extractor]
+\# 特徴抽出プログラムによる出力ディレクトリ
+output\_touch=image\_feature\_extractor/touch
+output\_release=image\_feature\_extractor/release
+\# 抽出する特徴量の種類の名前
+feature\_name=ilsvrc13
+default\_group=image\_feature\_extractor\_v1
+[serv4recog]
+\# server4recogのIPアドレス,ポート番号
+host=10.236.170.190
+port=8080
+[chiffon\_server]
+\# CHIFFONのIPアドレス,ポート番号
+host=133.3.251.221
+port=8080
+path=/release
+navigator=object\_access
 ```
-
 
 
 ## CHIFFONからの情報の取得
 
-###取得する情報
-
-スクリプト起動時にCHIFFONから引数で指定した`username`を基に`session\_id`,`recipe\_id`を取得する。
+スクリプト起動時にCHIFFONから引数で指定した`user\_id`を基に`session\_id`,`recipe\_id`を取得する。
 
 * `session\_id`
-    * 書式:`{username}-{datetime}`
-    * `username`:ユーザー名
-    	* 設定ファイルで指定する
-	* `datetime`:ログイン日時
-		* 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
-	* 例:`guest-2015.12.08_14.33.56.381162`
-	* `http://chiffon.mm.media.kyoto-u.ac.jp/woz/session_id/{username}`から取得可能(後述)
+    * 書式:`{user\_id}-{datetime}`
+        * `user\_id`:ユーザー名
+        	* 引数で指定する
+    	* `datetime`:ログイン日時
+    		* 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
+    	* 例:`guest-2015.12.08_14.33.56.381162`
+	* `http://{chiffon\_server["host"]}:{chiffon\_server["port"]}/woz/session_id/{user\_id}`から取得可能
+        * 上の方ほど日付が新しい
+		* 一番上に書かれているものを`session\_id`として用いる
 * `recipe\_id`
-    * 例:`FriedRice\_with\_StarchySauce`
-
-### sessionidの取得
-
-```
-http://chiffon.mm.media.kyoto-u.ac.jp/woz/session_id/{username}
-```
-
-`username`には引数で指定したものを用いる。上の方ほど日付が新しく、一番上に書かれているものを`session\_id`として用いる。
+	* 各レシピに割り当てられるID
+        * 例:`FriedRice\_with\_StarchySauce`
+    * `http://{chiffon\_server["host"]}:{chiffon\_server["port"]}/woz/recipe/{session\_id}`から取得可能
+        * HTTP GETにより取得されるレシピはXMLで記述されている
+    	* `recipe\_id`はrecipe要素のidとして指定されている
 
 
-### レシピ取得
 
-```
-http://chiffon.mm.media.kyoto-u.ac.jp/woz/recipe/{session_id}
-```
+## TableObjectManager起動
 
-上のURLによって取得出来るレシピはXMLで記述されている。`recipe\_id`はrecipe要素のidによって指定されているものを用いる。
+(設定ファイル(`{output\_dir}/{session\_ids[0]}/{PUT,TAKEN}`)の読み込み？)
+(画像出力ディレクトリ作成,TableObjectManager起動...起動方法？)
+
 
 
 ## 特徴量抽出
 
 特徴量抽出用プログラムは外部のプログラムをスクリプト内部で呼び出すことで実行する。
 
-プログラムの引数として`{input_file}`,`{output_file}`を渡す必要がある。`{input_file}`には保存された画像のパス、`{output_file}`には特徴量を保存するファイルのパスを指定する。`input\_file`には追加された画像ファイルのパス,`output_file`は設定ファイルで指定されたディレクトリのパスをそれぞれ用いる。
+プログラムの引数として`{input\_file}`,`{output\_file}`を渡す必要がある。`{input\_file}`には保存された画像のパス、`{output\_file}`には特徴量を保存するファイルのパスを指定する。`input\_file`には追加された画像ファイルのパス,`output\_file`は設定ファイルで指定されたディレクトリのパスをそれぞれ用いる。
+
+(server4recogに渡すための特徴量の成形方法？)
+
 
 
 ## server4recog
-
 
 ### 送信するURLおよびクエリ
 
@@ -122,6 +137,7 @@ http://localhost:8080/ml/my_db/my_feature/svc/predict?json_data={${SAMPLE}, ${CL
     * `recipe\_id`(レシピ名)を入れる。
 
 
+
 ## CHIFFON
 
 ### 送信するURLおよびクエリ
@@ -142,5 +158,4 @@ http://chiffon.mm.media.kyoto-u.ac.jp/receiver?sessionid={sessionid}&string={str
 	* `timestamp`:クエリ送信日時
 		* 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
 	* 例:`{"navigator":"object_access","action":{"target":"knife_utensil","name":"release","timestamp":"2015.12.08_15.06.27.710000"}}`
-
 
