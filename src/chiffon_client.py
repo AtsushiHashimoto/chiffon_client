@@ -7,7 +7,7 @@ import sys
 import argparse
 import subprocess
 import json
-import yaml
+import ConfigParser
 
 
 '''
@@ -58,21 +58,29 @@ class DirectoryManager():
 
 if __name__=="__main__":
 
-    FILENAME_CONFIG_CLIENT="chiffon_client.conf"
-    
     PATH_BATCH_RUBY="batch_feature_extraction.rb"
     INT_CHECK=5
     PATH_HTTP_RECOG="/ml/my_db/my_feature/svc/predict"
     PATH_HTTP_CHIFFON=""
 
+    
+    PATH_CONFIG_CLIENT="chiffon_client.conf"    
+    dict_conf={}
+    
     # 引数取得
     parser_args=argparse.ArgumentParser("CHIFFONに用いられる各モジュールの連携用スクリプト")
     parser_args.add_argument("user_id",help="CHIFFONのユーザー名")
     parser_args.add_argument("grouptag",nargs="+",help="サンプルに付加するグループタグ")
     args_client=parser_args.parse_args()
-    user_id=args_client.user_id
-    list_grouptags=args_client.grouptag
-    
+    dict_conf["user_id"]=args_client.user_id
+    dict_conf["list_grouptags"]=args_client.grouptag
+
+    # 設定ファイル読み込み
+    config=ConfigParser.ConfigParser()
+    config.read(PATH_CONFIG_CLIENT)
+    for section in config.sections():
+        dict_conf[section]=config.items(section)
+
 
     '''
     dirman=DirectoryManager(dict_settings["dir_check"])
