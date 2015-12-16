@@ -27,7 +27,7 @@
 スクリプトは以下の様に引数を指定して起動する。
 
 ```
-python chiffon\_cient.py \[user\_id\] \[grouptag ...\]
+python chiffon\_cient.py user\_id grouptag \[grouptag ...\]
 ```
 
 指定する引数は以下の通り。
