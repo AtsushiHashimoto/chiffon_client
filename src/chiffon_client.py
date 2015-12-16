@@ -10,11 +10,7 @@ import json
 import yaml
 
 
-PATH_BATCH_RUBY="batch_feature_extraction.rb"
-INT_CHECK=5
-PATH_HTTP_RECOG="/ml/my_db/my_feature/svc/predict"
-PATH_HTTP_CHIFFON=""
-
+'''
 
 def process_http_recog(http_ip,http_port,http_path,dict_query):
 
@@ -57,18 +53,26 @@ class DirectoryManager():
         sets_newfilepath=self.sets_filepath.difference(sets_filepath_before)
 
         return list(sets_newfilepath)
-
+'''
+    
 
 if __name__=="__main__":
 
-    # 引数:設定ファイルのパス
-    parser_args=argparse.ArgumentParser("各モジュールの連携用スクリプト")
-    parser_args.add_argument("file_settings",help="設定ファイルのパス")
-    args_script=parser_args.parse_args()
+    FILENAME_CONFIG_CLIENT="chiffon_client.conf"
+    
+    PATH_BATCH_RUBY="batch_feature_extraction.rb"
+    INT_CHECK=5
+    PATH_HTTP_RECOG="/ml/my_db/my_feature/svc/predict"
+    PATH_HTTP_CHIFFON=""
 
-    with open(args_script.file_settings) as f:
-        dict_settings=yaml.load(f)
-
+    # 引数取得
+    parser_args=argparse.ArgumentParser("CHIFFONに用いられる各モジュールの連携用スクリプト")
+    parser_args.add_argument("user_id",help="CHIFFONのユーザー名")
+    parser_args.add_argument("grouptag",nargs="+",help="サンプルに付加するグループタグ")
+    args_client=parser_args.parse_args()
+    user_id=args_client.user_id
+    list_grouptags=args_client.grouptag
+    
 
     '''
     dirman=DirectoryManager(dict_settings["dir_check"])
