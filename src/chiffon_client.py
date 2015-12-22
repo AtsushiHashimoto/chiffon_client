@@ -8,6 +8,7 @@ import argparse
 import subprocess
 import json
 import ConfigParser
+import xml.etree.ElementTree
 
 
 '''
@@ -54,14 +55,14 @@ class DirectoryManager():
 
         return list(sets_newfilepath)
 '''
-    
+
+
 
 if __name__=="__main__":
 
     PATH_BATCH_RUBY="batch_feature_extraction.rb"
     INT_CHECK=5
     PATH_HTTP_RECOG="/ml/my_db/my_feature/svc/predict"
-    PATH_HTTP_CHIFFON=""
 
     
     PATH_CONFIG_CLIENT="chiffon_client.conf"    
@@ -79,8 +80,29 @@ if __name__=="__main__":
     config=ConfigParser.ConfigParser()
     config.read(PATH_CONFIG_CLIENT)
     for section in config.sections():
-        dict_conf[section]=config.items(section)
+        dict_conf[section]={}
+        for tuple_param in config.items(section):
+            dict_conf[section][tuple_param[0]]=tuple_param[1]
 
+    # CHIFFONからsession_id,recipe_idを取得
+    # 
+    # url_session_id="http://{ip}:{port}{path}".format(ip=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path="/woz/session_id/{user_id}".format(user_id=dict_conf["user_id"]))
+    url_session_id="http://chiffon.mm.media.kyoto-u.ac.jp/woz/session_id/guest"
+    try:
+        result_session_id=urllib2.urlopen(url_session_id)
+    except:
+        print("Error:{err_info}".format(err_info=sys.exec_info()[0]))
+    session_id=result_session_id.readline().rstrip("\n")
+
+    url_recipe_id="http://chiffon.mm.media.kyoto-u.ac.jp/woz/recipe/{session_id}".format(session_id=session_id)
+    try:
+        result_session_id=urllib2.urlopen(url_recipe_id)
+    except:
+        print("Error:{err_info}".format(err_info=sys.exec_info()[0]))
+    elem_root=xml.etree.ElementTree.fromstring(result_session_id.read())
+    recipe_id=elem_root.attrib["id"]
+
+    
 
     '''
     dirman=DirectoryManager(dict_settings["dir_check"])
