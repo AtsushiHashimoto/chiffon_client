@@ -7,7 +7,6 @@
 
 1. 設定ファイル(`chiffon\_client.yaml`)の読み込み
 2. `user\_id`を基にCHIFFONサーバから`session\_id`,`recipe\_id`を取得
-(設定ファイル(`{output\_dir}/{session\_ids[0]}/{PUT,TAKEN}`)の読み込み？)
 3. 画像保存用ディレクトリを作成
 4. TableObjectManagerを起動
 5. 特定の画像保存用ディレクトリに保存された画像を随時チェック
@@ -95,8 +94,7 @@ navigator=object\_access
 
 ## TableObjectManager起動
 
-(設定ファイル(`{output\_dir}/{session\_ids[0]}/{PUT,TAKEN}`)の読み込み？)
-(画像出力ディレクトリ作成,TableObjectManager起動...起動方法？)
+(起動方法)
 
 
 
@@ -105,8 +103,6 @@ navigator=object\_access
 特徴量抽出用プログラムは外部のプログラムをスクリプト内部で呼び出すことで実行する。
 
 プログラムの引数として`{input\_file}`,`{output\_file}`を渡す必要がある。`{input\_file}`には保存された画像のパス、`{output\_file}`には特徴量を保存するファイルのパスを指定する。`input\_file`には追加された画像ファイルのパス,`output\_file`は設定ファイルで指定されたディレクトリのパスをそれぞれ用いる。
-
-(server4recogに渡すための特徴量の成形方法？)
 
 
 
@@ -122,7 +118,7 @@ http://localhost:8080/ml/my_db/my_feature/svc/predict?json_data={${SAMPLE}, ${CL
 
 * feature
     * サンプルの特徴量。
-    * 前の特徴量抽出プログラムの出力を成形したものが入る。
+    * 前の特徴量抽出プログラムにより出力されたファイルの中身が入る。
 * id
     * 入力するサンプルのID。
     * 画像ファイルのbasenameを使う。
