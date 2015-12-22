@@ -1,14 +1,14 @@
 # -*- coding:utf-8 -*-
+import lib.myutils
 import os
 import multiprocessing
 import time
 import urllib,urllib2
 import sys
-import argparse
 import subprocess
 import json
-import ConfigParser
-import xml.etree.ElementTree
+import argparse
+
 
 
 '''
@@ -74,53 +74,37 @@ if __name__=="__main__":
     parser_args.add_argument("user_id",help="CHIFFONのユーザー名")
     parser_args.add_argument("grouptag",nargs="+",help="サンプルに付加するグループタグ")
     args_client=parser_args.parse_args()
-    dict_conf["user_id"]=args_client.user_id
-    dict_conf["list_grouptags"]=args_client.grouptag
+    dict_settings=vars(parser_args.parse_args())
+
+
+    # 設定ファイル読み込み
+    dict_conf=lib.myutils.make_dict_conf(PATH_CONFIG_CLIENT)
+    dict_settings.update(dict_conf)
 
     
-    # 設定ファイル読み込み
-    config=ConfigParser.ConfigParser()
-    config.read(PATH_CONFIG_CLIENT)
-    for section in config.sections():
-        dict_conf[section]={}
-        for tuple_param in config.items(section):
-            dict_conf[section][tuple_param[0]]=tuple_param[1]
-
-            
     # CHIFFONからsession_id,recipe_idを取得
-    # url_session_id="http://{ip}:{port}{path}".format(ip=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path="/woz/session_id/{user_id}".format(user_id=dict_conf["user_id"]))
-    url_session_id="http://chiffon.mm.media.kyoto-u.ac.jp/woz/session_id/guest"
-    try:
-        result_session_id=urllib2.urlopen(url_session_id)
-    except:
-        print("Error:{err_info}".format(err_info=sys.exec_info()[0]))
-    session_id=result_session_id.readline().rstrip("\n")
+    # url_session="http://{ip}:{port}{path}".format(ip=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path="/woz/session_id/{user_id}".format(user_id=dict_conf["user_id"]))
+    url_session="http://chiffon.mm.media.kyoto-u.ac.jp/woz/session_id/guest"
+    session_id=lib.myutils.get_session_id(url_session)
 
-    url_recipe_id="http://chiffon.mm.media.kyoto-u.ac.jp/woz/recipe/{session_id}".format(session_id=session_id)
-    try:
-        result_session_id=urllib2.urlopen(url_recipe_id)
-    except:
-        print("Error:{err_info}".format(err_info=sys.exec_info()[0]))
-    elem_root=xml.etree.ElementTree.fromstring(result_session_id.read())
-    recipe_id=elem_root.attrib["id"]
+    url_recipe="http://chiffon.mm.media.kyoto-u.ac.jp/woz/recipe/{session_id}".format(session_id=session_id)
+    recipe_id=lib.myutils.get_recipe_id(url_recipe)
 
 
     # ディレクトリ作成(TableObjectManager,FeatureExtractor)
-    list_name_dir=["output_touch","output_release"]
-    for name_dir in list_name_dir:
-        path_dir_tom=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf["table_object_manager"][name_dir])
-        if not os.path.isdir(path_dir_tom):
-            os.makedirs(path_dir_tom)
-        path_dir_fe=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf["image_feature_extractor"][name_dir])
-        if not os.path.isdir(path_dir_fe):
-            os.makedirs(path_dir_fe)
+    list_name_dir_exec=["table_object_manager","image_feature_extractor"]
+    list_name_dir_out=["output_touch","output_release"]
+    for name_dir_exec in list_name_dir_exec:
+        for name_dir_out in list_name_dir_out:
+            path_dir=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf[name_dir_exec][name_dir_out])
+            lib.myutils.makedirs_ex(path_dir)
 
 
-
-        
-    # 設定ファイル読み込み+TableObjectManager起動
-    
-    
+    # TableObjectManager起動
+    '''
+    PATH_TOM=""
+    subprocess.call([PATH_TOM,PATH_RUBY_BATCH,dir_img,filepath_output])    
+    '''
 
     # ループ(画像取得->スレッド作成)
     '''
