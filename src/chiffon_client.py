@@ -60,13 +60,14 @@ class DirectoryManager():
 
 if __name__=="__main__":
 
-    PATH_BATCH_RUBY="batch_feature_extraction.rb"
+    # PATH_BATCH_RUBY="batch_feature_extraction.rb"
     INT_CHECK=5
-    PATH_HTTP_RECOG="/ml/my_db/my_feature/svc/predict"
+    # PATH_HTTP_RECOG="/ml/my_db/my_feature/svc/predict"
 
-    
+
     PATH_CONFIG_CLIENT="chiffon_client.conf"    
     dict_conf={}
+
     
     # 引数取得
     parser_args=argparse.ArgumentParser("CHIFFONに用いられる各モジュールの連携用スクリプト")
@@ -76,6 +77,7 @@ if __name__=="__main__":
     dict_conf["user_id"]=args_client.user_id
     dict_conf["list_grouptags"]=args_client.grouptag
 
+    
     # 設定ファイル読み込み
     config=ConfigParser.ConfigParser()
     config.read(PATH_CONFIG_CLIENT)
@@ -84,8 +86,8 @@ if __name__=="__main__":
         for tuple_param in config.items(section):
             dict_conf[section][tuple_param[0]]=tuple_param[1]
 
+            
     # CHIFFONからsession_id,recipe_idを取得
-    # 
     # url_session_id="http://{ip}:{port}{path}".format(ip=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path="/woz/session_id/{user_id}".format(user_id=dict_conf["user_id"]))
     url_session_id="http://chiffon.mm.media.kyoto-u.ac.jp/woz/session_id/guest"
     try:
@@ -102,8 +104,25 @@ if __name__=="__main__":
     elem_root=xml.etree.ElementTree.fromstring(result_session_id.read())
     recipe_id=elem_root.attrib["id"]
 
+
+    # ディレクトリ作成(TableObjectManager,FeatureExtractor)
+    list_name_dir=["output_touch","output_release"]
+    for name_dir in list_name_dir:
+        path_dir_tom=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf["table_object_manager"][name_dir])
+        if not os.path.isdir(path_dir_tom):
+            os.makedirs(path_dir_tom)
+        path_dir_fe=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf["image_feature_extractor"][name_dir])
+        if not os.path.isdir(path_dir_fe):
+            os.makedirs(path_dir_fe)
+
+
+
+        
+    # 設定ファイル読み込み+TableObjectManager起動
+    
     
 
+    # ループ(画像取得->スレッド作成)
     '''
     dirman=DirectoryManager(dict_settings["dir_check"])
     while(True):
