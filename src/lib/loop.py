@@ -16,6 +16,7 @@ def process_loop(filepath_img,dict_conf):
 
 
 
+
 class ChangeHandler(FileSystemEventHandler):
 
     def __init__(self,dict_conf):
@@ -88,16 +89,3 @@ class DirectoryManager():
         return list(sets_newfilepath)
 '''
 
-
-'''
-dirman=DirectoryManager(dict_settings["dir_check"])
-while(True):
-    list_newfilepath=dirman.check_directory()
-
-    # ディレクトリから画像を取得
-    for filepath in list_newfilepath:
-        proc_file=multiprocessing.Process(target=process_image,args=(filepath,dict_settings))
-        proc_file.start()
-
-    time.sleep(INT_CHECK)
-'''
