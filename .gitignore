@@ -64,5 +64,8 @@ include/
 .Python
 pip-selfcheck.json
 
+# Local Image Files
+data/
+
 # Local Library
 !src/lib/
