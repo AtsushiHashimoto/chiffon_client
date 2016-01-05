@@ -2,7 +2,6 @@
 import lib.myutils
 import lib.loop
 import os
-import multiprocessing
 import urllib,urllib2
 import sys
 import subprocess
@@ -17,11 +16,9 @@ if __name__=="__main__":
     INT_CHECK=5
     # PATH_HTTP_RECOG="/ml/my_db/my_feature/svc/predict"
 
-
     PATH_CONFIG_CLIENT="chiffon_client.conf"    
     dict_conf={}
 
-    
     # 引数取得
     parser_args=argparse.ArgumentParser("CHIFFONに用いられる各モジュールの連携用スクリプト")
     parser_args.add_argument("user_id",help="CHIFFONのユーザー名")
@@ -29,11 +26,9 @@ if __name__=="__main__":
     args_client=parser_args.parse_args()
     dict_settings=vars(parser_args.parse_args())
 
-
     # 設定ファイル読み込み
     dict_conf=lib.myutils.make_dict_conf(PATH_CONFIG_CLIENT)
     dict_settings.update(dict_conf)
-
     
     # CHIFFONからsession_id,recipe_idを取得
     # IPで開けない？
@@ -45,7 +40,6 @@ if __name__=="__main__":
     url_recipe="http://chiffon.mm.media.kyoto-u.ac.jp/woz/recipe/{session_id}".format(session_id=session_id)
     recipe_id=lib.myutils.get_recipe_id(url_recipe)
 
-
     # ディレクトリ作成(TableObjectManager,FeatureExtractor)
     list_name_dir_exec=["table_object_manager","image_feature_extractor"]
     list_name_dir_out=["output_touch","output_release"]
@@ -53,7 +47,6 @@ if __name__=="__main__":
         for name_dir_out in list_name_dir_out:
             path_dir=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf[name_dir_exec][name_dir_out])
             lib.myutils.makedirs_ex(path_dir)
-
 
     # TableObjectManager起動
     # 渡すディレクトリと返すファイルのパスは？
@@ -63,25 +56,8 @@ if __name__=="__main__":
     subprocess.call([PATH_TOM_W,dir_img,filepath_output])    
     '''
 
-
     # ループ(画像取得->スレッド作成)
-    path_dir_image_touch=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf["table_object_manager"]["output_touch"])
-    # path_dir_image_touch=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf["table_object_manager"]["output_touch"])
-    print(path_dir_image_touch)
-
+    # "table_object_manager"は設定ファイルから得る or パスの末尾をカット
+    path_dir_image_TOM=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,"table_object_manager")
     while(True):
-        lib.loop.makeNewThreads(path_dir_image_touch)
-        
-
-    '''
-    dirman=DirectoryManager(dict_settings["dir_check"])
-    while(True):
-        list_newfilepath=dirman.check_directory()
-
-        # ディレクトリから画像を取得
-        for filepath in list_newfilepath:
-            proc_file=multiprocessing.Process(target=process_image,args=(filepath,dict_settings))
-            proc_file.start()
-
-        time.sleep(INT_CHECK)
-    '''
+        lib.loop.makeNewThreads(path_dir_image_TOM,dict_conf)

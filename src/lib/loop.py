@@ -1,21 +1,36 @@
 # -*- coding:utf-8 -*-
 import myutils
 import time
+import multiprocessing
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 
+def process_loop(filepath_img,dict_conf):
+    
+    count=0
+    while True:
+        count+=1
+        print("{0}:{1}".format(count,filepath_img))
+        time.sleep(1)
+
+
+
 class ChangeHandler(FileSystemEventHandler):
+
+    def __init__(self,dict_conf):
+        self.dict_conf=dict_conf
     
     def on_created(self, event):
         if event.is_directory:
             return
         if myutils.get_ext(event.src_path) in ('.jpg','png','.txt'):
-            print('%s has been created.' % event.src_path)
+            proc_loop=multiprocessing.Process(target=process_loop,args=(event.src_path,self.dict_conf))
+            proc_loop.start()
 
 
-def makeNewThreads(path_dir):
-    event_handler=ChangeHandler()
+def makeNewThreads(path_dir,dict_conf):
+    event_handler=ChangeHandler(dict_conf)
     observer_release=Observer()
     observer_release.schedule(event_handler,path_dir,recursive=True)
     observer_release.start()
@@ -25,7 +40,6 @@ def makeNewThreads(path_dir):
     except KeyboardInterrupt:
         observer_release.stop()
     observer_release.join()
-
 
 
 
@@ -72,4 +86,18 @@ class DirectoryManager():
         sets_newfilepath=self.sets_filepath.difference(sets_filepath_before)
 
         return list(sets_newfilepath)
+'''
+
+
+'''
+dirman=DirectoryManager(dict_settings["dir_check"])
+while(True):
+    list_newfilepath=dirman.check_directory()
+
+    # ディレクトリから画像を取得
+    for filepath in list_newfilepath:
+        proc_file=multiprocessing.Process(target=process_image,args=(filepath,dict_settings))
+        proc_file.start()
+
+    time.sleep(INT_CHECK)
 '''
