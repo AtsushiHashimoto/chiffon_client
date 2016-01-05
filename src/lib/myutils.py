@@ -3,9 +3,7 @@ import urllib2
 import xml.etree.ElementTree
 import os
 import sys
-
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+import time
 
 
 def make_dict_conf(path_conf):
@@ -33,16 +31,10 @@ def get_recipe_id(url):
     return elem_root.attrib["id"]
 
 
+
+def get_ext(filename):
+    return os.path.splitext(filename)[-1].lower()
+
 def makedirs_ex(path_dir):
     if not os.path.isdir(path_dir):
         os.makedirs(path_dir)
-
-
-class ChangeHandler(FileSystemEventHandler):
-    
-    def on_created(self, event):
-        if event.is_directory:
-            return
-        if getext(event.src_path) in ('.jpg','.png','.txt'):
-            print('%s has been created.' % event.src_path)
-
