@@ -63,3 +63,6 @@ bin/
 include/
 .Python
 pip-selfcheck.json
+
+# Local Library
+!src/lib/
