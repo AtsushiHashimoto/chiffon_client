@@ -21,36 +21,31 @@ def load_settings(path_conf):
 
 # CHIFFONからsession_id,recipe_idを取得
 def get_chiffonid(dict_conf):
-
-    domain=dict_conf["chiffon_server"]["domain"]
-    path_sessionid="{path}{user_id}".format(path=dict_conf["chiffon_server"]["path_sessionid"],user_id=dict_conf["user_id"])
-    url_session="http://{domain}:{port}{path}".format(domain=domain,port=dict_conf["chiffon_server"]["port"],path=path_sessionid)
+    url_session=myutils.get_url_request(dict_conf["chiffon_server"]["domain"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_sessionid"],dict_conf["user_id"]])
     session_id=myutils.get_session_id(url_session)    
-
-    url_recipe="http://chiffon.mm.media.kyoto-u.ac.jp/woz/recipe/{session_id}".format(session_id=session_id)
+    url_recipe=myutils.get_url_request(dict_conf["chiffon_server"]["domain"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_recipe"],session_id])
     recipe_id=myutils.get_recipe_id(url_recipe)
     return (session_id,recipe_id)
 
 
 # データ保存用ディレクトリの作成
-# ディレクトリ名指定方法は要修正
-def makeImageDir(dict_conf,session_id):
+# 辞書のデータ保存ディレクトリの値を絶対パスに更新
+def makeImageDir(dict_conf):
     list_name_dir_exec=["table_object_manager","image_feature_extractor"]
     list_name_dir_out=["output_touch","output_release"]
+    dict_abspath={}
     for name_dir_exec in list_name_dir_exec:
         for name_dir_out in list_name_dir_out:
-            path_dir=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf[name_dir_exec][name_dir_out])
+            path_dir=os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"],dict_conf[name_dir_exec][name_dir_out])
+            dict_conf[name_dir_exec][name_dir_out]=path_dir
             myutils.makedirs_ex(path_dir)
 
 
 def startTableObjectManager(dict_conf):
+    #path_tom_w=subprocess.call(["cygpath","-w",dict_conf["table_object_manager"]["path_exec"]])
+    path_tom_w=dict_conf["table_object_manager"]["path_exec"]
+    list_opt_dir=["-P",dict_conf["table_object_manager"]["output_touch"],"-T",dict_conf["table_object_manager"]["output_release"]]
+    list_opt_default=dict_conf["table_object_manager"]["default_options"].split()
+    list_cmd=[path_tom_w]+list_opt_dir+list_opt_default
+    #subprocess.call([list_cmd])
     print("TableObjectManager has been opened.")
-    # output_put -P,output_taken -T(dir)
-    # 他は設定ファイル
-    '''
-    PATH_TOM_U=""
-    dir_img=""
-    filepath_output=""
-    PATH_TOM_W=subprocess.call(["cygpath","-w",PATH_TOM_U])
-    subprocess.call([PATH_TOM_W,dir_img,filepath_output])    
-    '''

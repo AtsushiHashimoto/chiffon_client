@@ -2,23 +2,22 @@
 import myutils
 import time
 import multiprocessing
+import os
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 
 def process_loop(filepath_img,dict_conf):
-    
+    '''
     count=0
     while True:
         count+=1
         print("{0}:{1}".format(count,filepath_img))
         time.sleep(1)
-
-
+    '''
 
 
 class ChangeHandler(FileSystemEventHandler):
-
     def __init__(self,dict_conf):
         self.dict_conf=dict_conf
     
@@ -30,10 +29,11 @@ class ChangeHandler(FileSystemEventHandler):
             proc_loop.start()
 
 
-def makeNewThreads(path_dir,dict_conf):
+def makeNewThreads(dict_conf):
     event_handler=ChangeHandler(dict_conf)
     observer_release=Observer()
-    observer_release.schedule(event_handler,path_dir,recursive=True)
+    for dirname in ["output_touch","output_release"]:
+        observer_release.schedule(event_handler,dict_conf["table_object_manager"][dirname],recursive=True)
     observer_release.start()
     try:
         while True:
@@ -41,7 +41,6 @@ def makeNewThreads(path_dir,dict_conf):
     except KeyboardInterrupt:
         observer_release.stop()
     observer_release.join()
-
 
 
 '''
@@ -75,17 +74,5 @@ def process_image(filepath_input,dict_settings):
     process_http(dict_settings["ip_chiffon"],dict_settings["port_chiffon"],PATH_HTTP_CHIFFON,dict_query_ch)
 
 
-class DirectoryManager():
-    def __init__(self,path_dir_check):
-        self.path_dir_check=path_dir_check
-        self.sets_filepath=[]
-        self.sets_filepath_before=[]
-
-    def check_directory(self):
-        sets_filepath_before=self.sets_filepath
-        self.sets_filepath=set(os.listdir(self.path_dir_check))
-        sets_newfilepath=self.sets_filepath.difference(sets_filepath_before)
-
-        return list(sets_newfilepath)
 '''
 

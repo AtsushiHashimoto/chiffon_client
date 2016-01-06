@@ -17,6 +17,10 @@ def make_dict_conf(path_conf):
     return dict_conf
 
 
+def get_url_request(domain,port,list_path):
+    path=os.path.join(*list_path)
+    return "http://{domain}:{port}{path}".format(domain=domain,port=port,path=path)
+
 def get_http_result(url):
     result=urllib2.urlopen(url)
     return result
@@ -29,7 +33,6 @@ def get_recipe_id(url):
     result=get_http_result(url)
     elem_root=xml.etree.ElementTree.fromstring(result.read())
     return elem_root.attrib["id"]
-
 
 
 def get_ext(filename):
