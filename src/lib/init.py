@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 import myutils
-
 import argparse
 import os
+
 
 def parse_args():
     parser_args=argparse.ArgumentParser("CHIFFONに用いられる各モジュールの連携用スクリプト")
@@ -10,6 +10,7 @@ def parse_args():
     parser_args.add_argument("grouptag",nargs="+",help="サンプルに付加するグループタグ")
     args_client=parser_args.parse_args()
     return vars(parser_args.parse_args())
+
 
 # 引数,設定ファイルから設定に関する辞書を作成
 def load_settings(path_conf):
@@ -28,8 +29,7 @@ def get_chiffonid(dict_conf):
     return (session_id,recipe_id)
 
 
-# データ保存用ディレクトリの作成
-# 辞書のデータ保存ディレクトリの値を絶対パスに更新
+# データ保存用ディレクトリの作成,辞書のデータ保存ディレクトリの値を絶対パスに更新
 def makeImageDir(dict_conf):
     list_name_dir_exec=["table_object_manager","image_feature_extractor"]
     list_name_dir_out=["output_touch","output_release"]

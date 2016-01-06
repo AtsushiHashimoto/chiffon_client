@@ -6,7 +6,6 @@ import lib.init
 
 if __name__=="__main__":
 
-    # PATH_HTTP_RECOG="/ml/my_db/my_feature/svc/predict"
     PATH_CONFIG_CLIENT="chiffon_client.conf"
 
     # 設定用の辞書を作成(引数,設定ファイル)
