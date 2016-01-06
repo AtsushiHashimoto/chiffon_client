@@ -28,16 +28,8 @@ if __name__=="__main__":
     # 実行ファイルのパス...設定ファイル？
     # 引数として何を渡す？
     # 画像保存先のディレクトリを渡す場合...複数？
-    '''
-    PATH_TOM_U=""
-    dir_img=""
-    filepath_output=""
-    PATH_TOM_W=subprocess.call(["cygpath","-w",PATH_TOM_U])
-    subprocess.call([PATH_TOM_W,dir_img,filepath_output])    
-    '''
+    lib.init.startTableObjectManager(dict_conf)
 
     # ループ(画像取得->スレッド作成)
-    # "table_object_manager"は設定ファイルから得る or パスの末尾をカット
-    path_dir_image_TOM=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,"table_object_manager")
-    while(True):
-        lib.loop.makeNewThreads(path_dir_image_TOM,dict_conf)
+    lib.loop.makeNewThreads(dict_conf)
+

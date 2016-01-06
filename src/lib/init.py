@@ -20,14 +20,12 @@ def load_settings(path_conf):
 
 
 # CHIFFONからsession_id,recipe_idを取得
-# IPで開けないっぽい？
 def get_chiffonid(dict_conf):
-    
-    # url_session="http://{ip}:{port}{path}".format(ip=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path="/woz/session_id/{user_id}".format(user_id=dict_conf["user_id"]))
-    # url_session="http://133.3.251.221:8080/woz/session_id/guest"
-    url_session="http://chiffon.mm.media.kyoto-u.ac.jp/woz/session_id/guest"
+
+    domain=dict_conf["chiffon_server"]["domain"]
+    path_sessionid="{path}{user_id}".format(path=dict_conf["chiffon_server"]["path_sessionid"],user_id=dict_conf["user_id"])
+    url_session="http://{domain}:{port}{path}".format(domain=domain,port=dict_conf["chiffon_server"]["port"],path=path_sessionid)
     session_id=myutils.get_session_id(url_session)    
-    # print(session_id)
 
     url_recipe="http://chiffon.mm.media.kyoto-u.ac.jp/woz/recipe/{session_id}".format(session_id=session_id)
     recipe_id=myutils.get_recipe_id(url_recipe)
@@ -43,3 +41,16 @@ def makeImageDir(dict_conf,session_id):
         for name_dir_out in list_name_dir_out:
             path_dir=os.path.join(dict_conf["chiffon_client"]["output_root"],session_id,dict_conf[name_dir_exec][name_dir_out])
             myutils.makedirs_ex(path_dir)
+
+
+def startTableObjectManager(dict_conf):
+    print("TableObjectManager has been opened.")
+    # output_put -P,output_taken -T(dir)
+    # 他は設定ファイル
+    '''
+    PATH_TOM_U=""
+    dir_img=""
+    filepath_output=""
+    PATH_TOM_W=subprocess.call(["cygpath","-w",PATH_TOM_U])
+    subprocess.call([PATH_TOM_W,dir_img,filepath_output])    
+    '''
