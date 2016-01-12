@@ -15,7 +15,7 @@ def process_loop(filepath_img,dict_conf):
         path_dir_feature=dict_conf["image_feature_extractor"]["output_touch"]
     elif os.path.abspath(os.path.dirname(filepath_img))==dict_conf["table_object_manager"]["output_release"]:
         path_dir_feature=dict_conf["image_feature_extractor"]["output_release"]
-    # 出力ファイル名？
+    # 出力ファイル名が不明
     filepath_output=os.path.join(path_dir_feature,dict_conf["image_feature_extractor"]["feature_name"])
     list_opt=[]
     myutils.callproc_cyg(dict_conf["image_feature_extractor"]["path_exec"],list_opt)
@@ -32,8 +32,10 @@ def process_loop(filepath_img,dict_conf):
     # result_recog=get_http_result(url_recog)
 
     # 認識結果をCHIFFONにHTTPで渡す
-    # dict_query_ch={}
-    # process_http(dict_settings["ip_chiffon"],dict_settings["port_chiffon"],PATH_HTTP_CHIFFON,dict_query_ch)
+    dict_query_ch={}
+    url_chiffon=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_receiver"]],dict_query_ch)
+    print(url_chiffon)
+    # get_http_result(url_chiffon)
     
 
 class ChangeHandler(FileSystemEventHandler):

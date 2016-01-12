@@ -22,10 +22,10 @@ def load_settings(path_conf):
 
 # CHIFFONからsession_id,recipe_idを取得
 def get_chiffonid(dict_conf):
-    url_session=myutils.get_url_request(dict_conf["chiffon_server"]["domain"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_sessionid"],dict_conf["user_id"]])
+    url_session=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_sessionid"],dict_conf["user_id"]])
     session_id=myutils.get_session_id(url_session)
     print("session_id:{session_id}".format(session_id=session_id))
-    url_recipe=myutils.get_url_request(dict_conf["chiffon_server"]["domain"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_recipe"],session_id])
+    url_recipe=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_recipe"],session_id])
     recipe_id=myutils.get_recipe_id(url_recipe)
     print("recipe_id:{recipe_id}".format(recipe_id=recipe_id))
     return (session_id,recipe_id)

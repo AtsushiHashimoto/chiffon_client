@@ -42,28 +42,33 @@ python chiffon\_cient.py user\_id grouptag \[grouptag ...\]
 ### 設定ファイルの記述
 
 ```
-[chiffon\_client]
-\# chiffon_clientが利用する全保存先ディレクトリのroot
-output\_root=/path/to/root
-[table\_object\_manager]
-\# TableObjectManagerによる出力のディレクトリ
-output\_touch: table\_object\_manager/PUT
-output\_release: table\_object\_manager/TAKEN
+[chiffon_client]
+# chiffon_clientが利用する全保存先ディレクトリのroot
+output\_root=/Users/kitchen/pytest/src/data
+[table\_object_manager]
+# TableObjectManagerの絶対パス
+path\_exec=/Users/kitchen/pytest/src/TableObjectManager.exe
+default\_options=-d 0 --gpu_device 0 -v false
+# TableObjectManagerによる出力のディレクトリ
+output\_touch=table\_object\_manager/PUT
+output\_release=table\_object\_manager/TAKEN
 [image\_feature\_extractor]
-\# 特徴抽出プログラムによる出力ディレクトリ
+# TableObjectManagerの絶対パス
+path\_exec=/Users/kitchen/pytest/src/ImageFeatureExtractor.exe
+# 特徴抽出プログラムによる出力ディレクトリ
 output\_touch=image\_feature\_extractor/touch
 output\_release=image\_feature\_extractor/release
-\# 抽出する特徴量の種類の名前
+# 抽出する特徴量の種類の名前
 feature\_name=ilsvrc13
 default\_group=image\_feature\_extractor\_v1
 [serv4recog]
-\# server4recogのIPアドレス,ポート番号
 host=10.236.170.190
 port=8080
 [chiffon\_server]
-\# CHIFFONのIPアドレス,ポート番号
-host=133.3.251.221
-port=8080
+domain=chiffon.mm.media.kyoto-u.ac.jp
+path\_sessionid=/woz/session\_id/
+path\_recipe=/woz/recipe/
+port=80
 path=/release
 navigator=object\_access
 ```
@@ -94,13 +99,12 @@ navigator=object\_access
 
 ## TableObjectManager起動
 
-(起動方法...指定する引数,実行ファイルのパスの指定場所?)
+TableObjectManagerは外部のプログラムをスクリプト内部で呼び出すことで実行する。実行ファイルのパスの指定場所は設定ファイルで指定する。後述の特徴量抽出プログラムも同様。
+
+引数として画像を保存するディレクトリを指定する必要があるが、これはスクリプト内で設定ファイル内のディレクトリ名を絶対パスに変換して指定する。その他の引数は設定ファイルで指定する。
 
 
 ## 特徴量抽出
-
-(起動方法...実行ファイルのパスの指定場所?)
-特徴量抽出用プログラムは外部のプログラムをスクリプト内部で呼び出すことで実行する。
 
 プログラムの引数として`{input\_file}`,`{output\_file}`を渡す必要がある。`{input\_file}`には保存された画像のパス、`{output\_file}`には特徴量を保存するファイルのパスを指定する。`input\_file`には追加された画像ファイルのパス,`output\_file`は設定ファイルで指定されたディレクトリのパスをそれぞれ用いる。
 
