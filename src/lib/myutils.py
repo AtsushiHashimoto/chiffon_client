@@ -19,8 +19,12 @@ def make_dict_conf(path_conf):
     return dict_conf
 
 
-def get_url_request(domain,port,list_path,query=""):
+def get_url_request(domain,port,list_path,dict_query=[]):
     path=os.path.join(*list_path)
+    if len(dict_query)==0:
+        query=""
+    else:
+        query="?"+"&".join(["{name}={value}".format(name=k,value=v) for k,v in dict_query.items()])
     return "http://{domain}:{port}{path}{query}".format(domain=domain,port=port,path=path,query=query)
 
 def get_http_result(url):
@@ -49,4 +53,4 @@ def get_ext(filename):
 def makedirs_ex(path_dir):
     if not os.path.isdir(path_dir):
         os.makedirs(path_dir)
-        print("New directory '{path_dir}' was made.".format(path_dir))
+        print("New directory '{path_dir}' was made.".format(path_dir=path_dir))

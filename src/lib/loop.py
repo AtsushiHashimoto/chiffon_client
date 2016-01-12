@@ -3,29 +3,37 @@ import myutils
 import time
 import multiprocessing
 import os
+import json
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 
 def process_loop(filepath_img,dict_conf):
     # 取得した画像を特徴抽出プログラムに渡して実行
-    dir_img=os.path.dirname(filepath_input)
-    filepath_output=dict_settings["filepath_ext"]
+    dir_img=os.path.dirname(filepath_img)
+    if os.path.abspath(os.path.dirname(filepath_img))==dict_conf["table_object_manager"]["output_touch"]:
+        path_dir_feature=dict_conf["image_feature_extractor"]["output_touch"]
+    elif os.path.abspath(os.path.dirname(filepath_img))==dict_conf["table_object_manager"]["output_release"]:
+        path_dir_feature=dict_conf["image_feature_extractor"]["output_release"]
+    # 出力ファイル名？
+    filepath_output=os.path.join(path_dir_feature,dict_conf["image_feature_extractor"]["feature_name"])
     list_opt=[]
     myutils.callproc_cyg(dict_conf["image_feature_extractor"]["path_exec"],list_opt)
 
     # 得た特徴をserver4recogにHTTPで渡す
-    with open(filepath_output) as f:
-        feature_extracted=f.open()
-    list_group=[dict_conf[],dict_conf["recipe_id"],dict_conf["image_feature_extractor"]["default_group"]]
-    json_data_re={"feature":feature_extracted,"id:":dir_img,"group":list_group,"name":dict_conf["recipe_id"]]}
-    dict_query_re={"json-data":json.dumps(json_data_re)}
-    result_recog=myutils.get_url_request(dict_conf["serv4recog"]["host"],dict_conf["serv4recog"]["port"],[dict_conf["serv4recog"][""]],dict_query_re)
-    # result_recog=process_http(dict_settings["ip_recog"],dict_settings["port_recog"],PATH_HTTP_RECOG,dict_query_re) #jsonのハッシュ形式
+    # with open(filepath_output) as f:
+    #    feature_extracted=f.open()
+    feature_extracted=""
+    list_group=[dict_conf["user_id"],dict_conf["recipe_id"],dict_conf["session_id"],dict_conf["image_feature_extractor"]["default_group"]]+dict_conf["grouptag"]
+    json_data_re={"feature":feature_extracted,"id:":dir_img,"group":list_group,"name":dict_conf["recipe_id"]}
+    dict_query_re={"json_data":json.dumps(json_data_re)}
+    url_recog=myutils.get_url_request(dict_conf["serv4recog"]["host"],dict_conf["serv4recog"]["port"],[dict_conf["serv4recog"]["path"]],dict_query_re)
+    print(url_recog)
+    # result_recog=get_http_result(url_recog)
 
     # 認識結果をCHIFFONにHTTPで渡す
-    dict_query_ch={}
-    process_http(dict_settings["ip_chiffon"],dict_settings["port_chiffon"],PATH_HTTP_CHIFFON,dict_query_ch)
+    # dict_query_ch={}
+    # process_http(dict_settings["ip_chiffon"],dict_settings["port_chiffon"],PATH_HTTP_CHIFFON,dict_query_ch)
     
 
 class ChangeHandler(FileSystemEventHandler):
