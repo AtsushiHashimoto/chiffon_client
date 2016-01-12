@@ -23,9 +23,11 @@ def load_settings(path_conf):
 # CHIFFONからsession_id,recipe_idを取得
 def get_chiffonid(dict_conf):
     url_session=myutils.get_url_request(dict_conf["chiffon_server"]["domain"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_sessionid"],dict_conf["user_id"]])
-    session_id=myutils.get_session_id(url_session)    
+    session_id=myutils.get_session_id(url_session)
+    print("session_id:{session_id}".format(session_id=session_id))
     url_recipe=myutils.get_url_request(dict_conf["chiffon_server"]["domain"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_recipe"],session_id])
     recipe_id=myutils.get_recipe_id(url_recipe)
+    print("recipe_id:{recipe_id}".format(recipe_id=recipe_id))
     return (session_id,recipe_id)
 
 
@@ -42,10 +44,8 @@ def makeImageDir(dict_conf):
 
 
 def startTableObjectManager(dict_conf):
-    #path_tom_w=subprocess.call(["cygpath","-w",dict_conf["table_object_manager"]["path_exec"]])
-    path_tom_w=dict_conf["table_object_manager"]["path_exec"]
     list_opt_dir=["-P",dict_conf["table_object_manager"]["output_touch"],"-T",dict_conf["table_object_manager"]["output_release"]]
     list_opt_default=dict_conf["table_object_manager"]["default_options"].split()
-    list_cmd=[path_tom_w]+list_opt_dir+list_opt_default
-    #subprocess.call([list_cmd])
-    print("TableObjectManager has been opened.")
+    list_opt=list_opt_dir+list_opt_default
+    myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_opt)
+    print("TableObjectManager is opened.")

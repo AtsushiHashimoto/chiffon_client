@@ -4,6 +4,8 @@ import xml.etree.ElementTree
 import os
 import sys
 import time
+import subprocess
+
 
 
 def make_dict_conf(path_conf):
@@ -17,9 +19,9 @@ def make_dict_conf(path_conf):
     return dict_conf
 
 
-def get_url_request(domain,port,list_path):
+def get_url_request(domain,port,list_path,query=""):
     path=os.path.join(*list_path)
-    return "http://{domain}:{port}{path}".format(domain=domain,port=port,path=path)
+    return "http://{domain}:{port}{path}{query}".format(domain=domain,port=port,path=path,query=query)
 
 def get_http_result(url):
     result=urllib2.urlopen(url)
@@ -35,9 +37,16 @@ def get_recipe_id(url):
     return elem_root.attrib["id"]
 
 
+def callproc_cyg(path_exec,list_args):
+    # path_exec_cyg=subprocess.call(["cygpath","-w",path_exec])
+    # list_cmd=[path_exec_cyg]+list_args
+    # return subprocess.call(list_cmd)
+    list_cmd=[path_exec]+list_args
+
 def get_ext(filename):
     return os.path.splitext(filename)[-1].lower()
 
 def makedirs_ex(path_dir):
     if not os.path.isdir(path_dir):
         os.makedirs(path_dir)
+        print("New directory '{path_dir}' was made.".format(path_dir))
