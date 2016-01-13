@@ -21,15 +21,16 @@ def process_loop(filepath_img,dict_conf):
     filename_feature=dict_conf["image_feature_extractor"]["feature_name"]+".csv"
     filepath_output=os.path.join(path_dir_feature,filename_feature)
     '''
-    files_dir_image=glob.glob(path_dir_image+"/*.txt")
+    files_dir_image=glob.glob(path_dir_image+"/*.")
+    list_result=[]
     for filepath_img in files_dir_image:
-        list_opt=[filepath_img]+dict_conf["image_feature_extractor"]["default_options"].split()
-        myutils.callproc_cyg(dict_conf["image_feature_extractor"]["path_exec"],list_opt)
+        list_opt=[myutils.convert_to_cygpath(filepath_img)]+dict_conf["image_feature_extractor"]["default_options"].split()
+        list_result.append(myutils.callproc_cyg(dict_conf["image_feature_extractor"]["path_exec"],list_opt))
 
     # 得た特徴をserver4recogにHTTPで渡す
     # with open(filepath_output) as f:
     #    feature_extracted=f.open()
-    feature_extracted=""
+    feature_extracted="".join(list_result)
     list_group=[dict_conf["user_id"],dict_conf["recipe_id"],dict_conf["session_id"],dict_conf["image_feature_extractor"]["default_group"]]+dict_conf["grouptag"]
     json_data_re={"feature":feature_extracted,"id:":dir_img,"group":list_group,"name":dict_conf["recipe_id"]}
     dict_query_re={"json_data":json.dumps(json_data_re)}
