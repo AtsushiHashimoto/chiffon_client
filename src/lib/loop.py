@@ -12,14 +12,6 @@ def process_loop(filepath_img,dict_conf):
     # 取得した画像を特徴抽出プログラムに渡して実行
     dir_img=os.path.dirname(filepath_img)
     path_dir_image=os.path.abspath(os.path.dirname(filepath_img))
-    '''
-    if path_dir_image==dict_conf["table_object_manager"]["output_touch"]:
-        path_dir_feature=dict_conf["image_feature_extractor"]["output_touch"]
-    elif path_dir_image==dict_conf["table_object_manager"]["output_release"]:
-        path_dir_feature=dict_conf["image_feature_extractor"]["output_release"]
-    filename_feature=dict_conf["image_feature_extractor"]["feature_name"]+".csv"
-    filepath_output=os.path.join(path_dir_feature,filename_feature)
-    '''
     files_dir_image=myutils.get_files_from_exts(path_dir_image,dict_conf["table_object_manager"]["fileexts"])
     list_result=[]
     for filepath_img in files_dir_image:
@@ -39,7 +31,7 @@ def process_loop(filepath_img,dict_conf):
     result_recog=""
 
     # 認識結果をCHIFFONにHTTPで渡す
-    str_timefmt="yyyy.MM.dd_HH.MM.ss.ffffff"
+    str_timefmt=dict_conf["chiffon_server"]["timestamp"]
     timestamp=myutils.get_time_stamp(str_timefmt)
     dict_string={"navigator":dict_conf["chiffon_server"]["navigator"],"action":{"target":result_recog,"name":dir_img,"timestamp":timestamp}}
     dict_query_ch={"session_id":dict_conf["session_id"],"string":json.dumps(dict_string)}

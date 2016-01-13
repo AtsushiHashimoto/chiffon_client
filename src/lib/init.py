@@ -19,7 +19,6 @@ def load_settings(path_conf):
     dict_conf_file=myutils.make_dict_conf(path_conf)
     dict_conf.update(dict_conf_file)
     dict_conf["table_object_manager"]["fileexts"]=dict_conf["table_object_manager"]["fileexts"].split(",")
-    print(dict_conf)
     return dict_conf
 
 
