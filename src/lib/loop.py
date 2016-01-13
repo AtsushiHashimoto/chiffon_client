@@ -4,7 +4,6 @@ import time
 import multiprocessing
 import os
 import json
-import glob
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -21,7 +20,7 @@ def process_loop(filepath_img,dict_conf):
     filename_feature=dict_conf["image_feature_extractor"]["feature_name"]+".csv"
     filepath_output=os.path.join(path_dir_feature,filename_feature)
     '''
-    files_dir_image=glob.glob(path_dir_image+"/*.")
+    files_dir_image=myutils.get_files_from_exts(path_dir_image,dict_conf["table_object_manager"]["fileexts"])
     list_result=[]
     for filepath_img in files_dir_image:
         list_opt=[myutils.convert_to_cygpath(filepath_img)]+dict_conf["image_feature_extractor"]["default_options"].split()
@@ -56,7 +55,7 @@ class ChangeHandler(FileSystemEventHandler):
     def on_created(self, event):
         if event.is_directory:
             return
-        if myutils.get_ext(event.src_path) in ('.jpg','png','.txt'):
+        if myutils.get_ext(event.src_path) in self.dict_conf["table_object_manager"]["fileexts"]:
             print("New File '{filepath}' was detected.".format(filepath=event.src_path))
             proc_loop=multiprocessing.Process(target=process_loop,args=(event.src_path,self.dict_conf))
             proc_loop.start()

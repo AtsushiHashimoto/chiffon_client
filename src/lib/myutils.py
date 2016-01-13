@@ -6,6 +6,7 @@ import sys
 import time
 import subprocess
 import datetime
+import glob
 
 
 def make_dict_conf(path_conf):
@@ -50,6 +51,15 @@ def callproc_cyg(path_exec,list_args):
     list_cmd=[path_exec]+list_args
     # return subprocess.call(list_cmd)
 
+
+def get_files_from_exts(path_dir,list_exts):
+    list_files=[]
+    for ext in list_exts:
+        list_file=glob.glob(path_dir+"/*{ext}".format(ext=ext))
+        if not list_file is None:
+            list_files.extend(list_file)
+    return list_files
+    
 
 
 def get_time_stamp(str_fmt):

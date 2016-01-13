@@ -13,10 +13,13 @@ def parse_args():
 
 
 # 引数,設定ファイルから設定に関する辞書を作成
+# 拡張子の組の文字列をリストに変換
 def load_settings(path_conf):
     dict_conf=parse_args()
     dict_conf_file=myutils.make_dict_conf(path_conf)
     dict_conf.update(dict_conf_file)
+    dict_conf["table_object_manager"]["fileexts"]=dict_conf["table_object_manager"]["fileexts"].split(",")
+    print(dict_conf)
     return dict_conf
 
 
@@ -44,7 +47,7 @@ def makeImageDir(dict_conf):
 
 
 def startTableObjectManager(dict_conf):
-    list_opt_dir=["-P",dict_conf["table_object_manager"]["output_touch"],"-T",dict_conf["table_object_manager"]["output_release"]]
+    list_opt_dir=["-P",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_touch"]),"-T",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_release"])]
     list_opt_default=dict_conf["table_object_manager"]["default_options"].split()
     list_opt=list_opt_dir+list_opt_default
     myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_opt)
