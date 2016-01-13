@@ -5,7 +5,7 @@ import os
 import sys
 import time
 import subprocess
-
+import datetime
 
 
 def make_dict_conf(path_conf):
@@ -41,14 +41,24 @@ def get_recipe_id(url):
     return elem_root.attrib["id"]
 
 
+def convert_to_cygpath(path):
+    return subprocess.call(["cygpath","-w",path])
+
 def callproc_cyg(path_exec,list_args):
-    # path_exec_cyg=subprocess.call(["cygpath","-w",path_exec])
+    # path_exec_cyg=convert_to_cygpath(path)
     # list_cmd=[path_exec_cyg]+list_args
     # return subprocess.call(list_cmd)
     list_cmd=[path_exec]+list_args
 
+
+def get_time_stamp(str_fmt):
+    time_now=datetime.datetime.now()
+    return time_now.strftime(str_fmt)
+
+
 def get_ext(filename):
     return os.path.splitext(filename)[-1].lower()
+
 
 def makedirs_ex(path_dir):
     if not os.path.isdir(path_dir):
