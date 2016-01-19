@@ -17,11 +17,11 @@
 ### 関連ファイル
 
 * chiffon\_client.py
-    * 一連の処理を行うPythonスクリプトファイル
+* 一連の処理を行うPythonスクリプトファイル
 * chiffon\_client.conf
-    * 各種設定を記述したconfファイル
+* 各種設定を記述したconfファイル
 * lib/
-    * chiffon_client.pyで用いるライブラリを置くディレクトリ
+* chiffon_client.pyで用いるライブラリを置くディレクトリ
 
 ### 引数
 
@@ -34,11 +34,11 @@ python chiffon\_cient.py user\_id grouptag \[grouptag ...\]
 指定する引数は以下の通り。
 
 * user\_id
-    * ユーザー名
+* ユーザー名
 * grouptag
-    * server4recogへ渡すサンプルに付加するグループタグ
-    * 複数指定可能
-	    * 但し最低1つは必要
+* server4recogへ渡すサンプルに付加するグループタグ
+* 複数指定可能
+* 但し最低1つは必要
 
 
 ### 設定ファイルの記述
@@ -81,21 +81,21 @@ navigator=object\_access
 スクリプト起動時にCHIFFONから引数で指定した`user\_id`を基に`session\_id`,`recipe\_id`を取得する。
 
 * `session\_id`
-    * 書式:`{user\_id}-{datetime}`
-        * `user\_id`:ユーザー名
-        	* 引数で指定する
-    	* `datetime`:ログイン日時
-    		* 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
-    	* 例:`guest-2015.12.08_14.33.56.381162`
-	* `http://{chiffon\_server["host"]}:{chiffon\_server["port"]}/woz/session_id/{user\_id}`から取得可能
-        * 上の方ほど日付が新しい
-		* 一番上に書かれているものを`session\_id`として用いる
+* 書式:`{user\_id}-{datetime}`
+* `user\_id`:ユーザー名
+* 引数で指定する
+* `datetime`:ログイン日時
+* 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
+* 例:`guest-2015.12.08_14.33.56.381162`
+* `http://{chiffon\_server["host"]}:{chiffon\_server["port"]}/woz/session_id/{user\_id}`から取得可能
+* 上の方ほど日付が新しい
+* 一番上に書かれているものを`session\_id`として用いる
 * `recipe\_id`
-	* 各レシピに割り当てられるID
-        * 例:`FriedRice\_with\_StarchySauce`
-    * `http://{chiffon\_server["host"]}:{chiffon\_server["port"]}/woz/recipe/{session\_id}`から取得可能
-        * HTTP GETにより取得されるレシピはXMLで記述されている
-    	* `recipe\_id`はrecipe要素のidとして指定されている
+* 各レシピに割り当てられるID
+* 例:`FriedRice\_with\_StarchySauce`
+* `http://{chiffon\_server["host"]}:{chiffon\_server["port"]}/woz/recipe/{session\_id}`から取得可能
+* HTTP GETにより取得されるレシピはXMLで記述されている
+* `recipe\_id`はrecipe要素のidとして指定されている
 
 
 
@@ -123,20 +123,20 @@ http://localhost:8080/ml/my_db/my_feature/svc/predict?json_data={${SAMPLE}, ${CL
 `{SAMPLE}`は以下のパラメータを持つ。
 
 * feature
-    * サンプルの特徴量。
-    * 前の特徴量抽出プログラムにより出力されたファイルの中身が入る。
+* サンプルの特徴量。
+* 前の特徴量抽出プログラムにより出力されたファイルの中身が入る。
 * id
-    * 入力するサンプルのID。
-    * 画像ファイルのbasenameを使う。
+* 入力するサンプルのID。
+* 画像ファイルのbasenameを使う。
 * group
-    * グループタグの名前
-    * 起動時の引数で指定した`group\_id`を配列の形で代入する。
+* グループタグの名前
+* 起動時の引数で指定した`group\_id`を配列の形で代入する。
 
 `{CLASSIFIER-PARAMS}`は以下のパラメータを持つ。
 
 * name
-    * 分類器の名前
-    * `recipe\_id`(レシピ名)を入れる。
+* 分類器の名前
+* `recipe\_id`(レシピ名)を入れる。
 
 
 
@@ -149,15 +149,14 @@ http://chiffon.mm.media.kyoto-u.ac.jp/receiver?sessionid={sessionid}&string={str
 ```
 
 * sessionid
-    * 起動時引数で指定した`session\_id`と同一。
+* 起動時引数で指定した`session\_id`と同一。
 * string
-    * 書式:`{"navigator":"object_acceess","action":{"target":{target},"name":{name},"timestamp":{timestamp}}}`
-	* `target`:操作対象
-    	* server4recogから返ってきたjsonのハッシュから決まる
-	* `name`:操作の内容
-        * `touch`(物を掴む動作)あるいは`release`(物を手放す動作)
-    	* 画像の保存されるディレクトリ名から決まる
-	* `timestamp`:クエリ送信日時
-		* 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
-	* 例:`{"navigator":"object_access","action":{"target":"knife_utensil","name":"release","timestamp":"2015.12.08_15.06.27.710000"}}`
-
+* 書式:`{"navigator":"object_acceess","action":{"target":{target},"name":{name},"timestamp":{timestamp}}}`
+* `target`:操作対象
+* server4recogから返ってきたjsonのハッシュから決まる
+* `name`:操作の内容
+* `touch`(物を掴む動作)あるいは`release`(物を手放す動作)
+* 画像の保存されるディレクトリ名から決まる
+* `timestamp`:クエリ送信日時
+* 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
+* 例:`{"navigator":"object_access","action":{"target":"knife_utensil","name":"release","timestamp":"2015.12.08_15.06.27.710000"}}`
