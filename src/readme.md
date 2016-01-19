@@ -20,6 +20,8 @@
     * 一連の処理を行うPythonスクリプトファイル
 * chiffon\_client.conf
     * 各種設定を記述したconfファイル
+* lib/
+    * chiffon_client.pyで用いるライブラリを置くディレクトリ
 
 ### 引数
 
@@ -42,23 +44,23 @@ python chiffon\_cient.py user\_id grouptag \[grouptag ...\]
 ### 設定ファイルの記述
 
 ```
-[chiffon_client]
-# chiffon_clientが利用する全保存先ディレクトリのroot
+[chiffon\_client]
+\# chiffon\_clientが利用する全保存先ディレクトリのroot
 output\_root=/Users/kitchen/pytest/src/data
-[table\_object_manager]
-# TableObjectManagerの絶対パス
+[table\_object\_manager]
+\# TableObjectManagerの絶対パス
 path\_exec=/Users/kitchen/pytest/src/TableObjectManager.exe
 default\_options=-d 0 --gpu_device 0 -v false
-# TableObjectManagerによる出力のディレクトリ
+\# TableObjectManagerによる出力のディレクトリ
 output\_touch=table\_object\_manager/PUT
 output\_release=table\_object\_manager/TAKEN
 [image\_feature\_extractor]
-# TableObjectManagerの絶対パス
+\# TableObjectManagerの絶対パス
 path\_exec=/Users/kitchen/pytest/src/ImageFeatureExtractor.exe
-# 特徴抽出プログラムによる出力ディレクトリ
+\# 特徴抽出プログラムによる出力ディレクトリ
 output\_touch=image\_feature\_extractor/touch
 output\_release=image\_feature\_extractor/release
-# 抽出する特徴量の種類の名前
+\# 抽出する特徴量の種類の名前
 feature\_name=ilsvrc13
 default\_group=image\_feature\_extractor\_v1
 [serv4recog]

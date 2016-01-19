@@ -58,8 +58,13 @@ docs/_build/
 # PyBuilder
 target/
 
+#Ipython Notebook
+.ipynb_checkpoints
+
+
 # Files for virtual environment
 bin/
+
 include/
 .Python
 pip-selfcheck.json
