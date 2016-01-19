@@ -46,8 +46,15 @@ def makeImageDir(dict_conf):
 
 
 def startTableObjectManager(dict_conf):
-    list_opt_dir=["-P",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_touch"]),"-T",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_release"])]
+    if(dict_conf["product_env"]["is_product"]=="1"):
+        list_opt_dir=["-P",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_touch"]),"-T",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_release"])]
+    else:
+        list_opt_dir=["-P",dict_conf["table_object_manager"]["output_touch"],"-T",dict_conf["table_object_manager"]["output_release"]]
+
     list_opt_default=dict_conf["table_object_manager"]["default_options"].split()
     list_opt=list_opt_dir+list_opt_default
-    myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_opt)
+
+    if(dict_conf["product_env"]["is_product"]=="1"):
+        myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_opt)
+
     print("TableObjectManager is opened.")
