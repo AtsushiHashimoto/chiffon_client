@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*-
-import lib.myutils
-import lib.loop
 import lib.init
-
+import lib.thread
 
 if __name__=="__main__":
 
@@ -19,4 +17,4 @@ if __name__=="__main__":
     lib.init.startTableObjectManager(dict_conf)
 
     # ループ(画像取得->スレッド作成)
-    lib.loop.makeNewThreads(dict_conf)
+    lib.thread.makeNewThreads(dict_conf)

@@ -1,12 +1,8 @@
 # -*- coding:utf-8 -*-
 import myutils
-import time
-import multiprocessing
+
 import os
 import json
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
-
 
 
 # 取得した画像を特徴抽出プログラムに渡して実行
@@ -60,39 +56,4 @@ def send_to_chiffon(filepath_img,dict_conf,result_recog):
 
     if(dict_conf["product_env"]["is_product"]=="1"):
         get_http_result(url_chiffon)
-
-
-
-def process_loop(filepath_img,dict_conf):
-    result_feature=feature_extract(filepath_img,dict_conf)
-    result_recog=send_to_server4recog(filepath_img,dict_conf,result_feature)
-    send_to_chiffon(filepath_img,dict_conf,result_feature)
-
-
-
-class ChangeHandler(FileSystemEventHandler):
-    def __init__(self,dict_conf):
-        self.dict_conf=dict_conf
-    
-    def on_created(self, event):
-        if event.is_directory:
-            return
-        if myutils.get_ext(event.src_path) in self.dict_conf["table_object_manager"]["fileexts"]:
-            print("New File '{filepath}' was detected.".format(filepath=event.src_path))
-            proc_loop=multiprocessing.Process(target=process_loop,args=(event.src_path,self.dict_conf))
-            proc_loop.start()
-
-
-def makeNewThreads(dict_conf):
-    event_handler=ChangeHandler(dict_conf)
-    observer_release=Observer()
-    for dirname in ["output_touch","output_release"]:
-        observer_release.schedule(event_handler,dict_conf["table_object_manager"][dirname],recursive=True)
-    observer_release.start()
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer_release.stop()
-    observer_release.join()
 
