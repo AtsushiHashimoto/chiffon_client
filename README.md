@@ -5,8 +5,8 @@
 
 ### 処理の流れ
 
-1. 設定ファイル(`chiffon\_client.yaml`)の読み込み
-2. `user\_id`を基にCHIFFONサーバから`session\_id`,`recipe\_id`を取得
+1. 設定ファイル(`chiffon_client.yaml`)の読み込み
+2. `user_id`を基にCHIFFONサーバから`session_id`,`recipe_id`を取得
 3. 画像保存用ディレクトリを作成
 4. TableObjectManagerを起動
 5. 特定の画像保存用ディレクトリに保存された画像を随時チェック
@@ -16,86 +16,100 @@
 
 ### 関連ファイル
 
-* chiffon\_client.py
-* 一連の処理を行うPythonスクリプトファイル
-* chiffon\_client.conf
-* 各種設定を記述したconfファイル
+* chiffon_client.py
+   * 一連の処理を行うPythonスクリプトファイル
+* chiffon_client.conf
+   * 各種設定を記述したconfファイル
 * lib/
-* chiffon_client.pyで用いるライブラリを置くディレクトリ
+   * chiffon_client.pyで用いるライブラリを置くディレクトリ
 
 ### 引数
 
 スクリプトは以下の様に引数を指定して起動する。
 
 ```
-python chiffon\_cient.py user\_id grouptag \[grouptag ...\]
+python chiffon_cient.py user_id grouptag [grouptag ...]
 ```
 
 指定する引数は以下の通り。
 
-* user\_id
-* ユーザー名
+* user_id
+   * ユーザー名
 * grouptag
-* server4recogへ渡すサンプルに付加するグループタグ
-* 複数指定可能
-* 但し最低1つは必要
+   * server4recogへ渡すサンプルに付加するグループタグ
+   * 複数指定可能
+     * 但し最低1つは必要
 
 
 ### 設定ファイルの記述
 
 ```
-[chiffon\_client]
-\# chiffon\_clientが利用する全保存先ディレクトリのroot
-output\_root=/Users/kitchen/pytest/src/data
-[table\_object\_manager]
-\# TableObjectManagerの絶対パス
-path\_exec=/Users/kitchen/pytest/src/TableObjectManager.exe
-default\_options=-d 0 --gpu_device 0 -v false
-\# TableObjectManagerによる出力のディレクトリ
-output\_touch=table\_object\_manager/PUT
-output\_release=table\_object\_manager/TAKEN
-[image\_feature\_extractor]
-\# TableObjectManagerの絶対パス
-path\_exec=/Users/kitchen/pytest/src/ImageFeatureExtractor.exe
-\# 特徴抽出プログラムによる出力ディレクトリ
-output\_touch=image\_feature\_extractor/touch
-output\_release=image\_feature\_extractor/release
-\# 抽出する特徴量の種類の名前
-feature\_name=ilsvrc13
-default\_group=image\_feature\_extractor\_v1
+[chiffon_client]
+# chiffon_clientが利用する全保存先ディレクトリのroot
+output_root=/Users/kitchen/pytest/src/data
+
+[table_object_manager]
+# TableObjectManagerの絶対パス
+path_exec=/Users/kitchen/pytest/src/TableObjectManager.exe
+default_options=-d 0 --gpu_device 0 -v false
+# TableObjectManagerによる出力のディレクトリ
+output_touch=table_object_manager/PUT
+output_release=table_object_manager/TAKEN
+# 画像拡張子一覧
+fileexts=.jpg,.png,.gif,.bmp,.tif
+
+[image_feature_extractor]
+# TableObjectManagerの絶対パス
+path_exec=/Users/kitchen/pytest/src/ImageFeatureExtractor.exe
+default_options=-s 256:256 -p /Users/kitchen/sample_data/imagenet_val.prototxt -m /Users/kitchen/sample_data/bvlc_reference_rcnn_ilsvrc13.caffemodel
+# 特徴抽出プログラムによる出力ディレクトリ
+output_touch=image_feature_extractor/touch
+output_release=image_feature_extractor/release
+# 抽出する特徴量の種類の名前
+feature_name=ilsvrc13
+default_group=image_feature_extractor_v1
+
 [serv4recog]
 host=10.236.170.190
 port=8080
-[chiffon\_server]
-domain=chiffon.mm.media.kyoto-u.ac.jp
-path\_sessionid=/woz/session\_id/
-path\_recipe=/woz/recipe/
+path=/ml/my_db/my_feature/svc/predict
+
+[chiffon_server]
+host=chiffon.mm.media.kyoto-u.ac.jp
+path_sessionid=/woz/session_id/
+path_recipe=/woz/recipe/
+path_receiver=/receiver
 port=80
 path=/release
-navigator=object\_access
+navigator=object_access
+timestamp=yyyy.MM.dd_HH.MM.ss.ffffff
+
+[product_env]
+# 本番環境なら1を指定
+is_product=0
 ```
 
 
 ## CHIFFONからの情報の取得
 
-スクリプト起動時にCHIFFONから引数で指定した`user\_id`を基に`session\_id`,`recipe\_id`を取得する。
+スクリプト起動時にCHIFFONから引数で指定した`user_id`を基に`session_id`,`recipe_id`を取得する。
 
-* `session\_id`
-* 書式:`{user\_id}-{datetime}`
-* `user\_id`:ユーザー名
-* 引数で指定する
-* `datetime`:ログイン日時
-* 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
-* 例:`guest-2015.12.08_14.33.56.381162`
-* `http://{chiffon\_server["host"]}:{chiffon\_server["port"]}/woz/session_id/{user\_id}`から取得可能
-* 上の方ほど日付が新しい
-* 一番上に書かれているものを`session\_id`として用いる
-* `recipe\_id`
-* 各レシピに割り当てられるID
-* 例:`FriedRice\_with\_StarchySauce`
-* `http://{chiffon\_server["host"]}:{chiffon\_server["port"]}/woz/recipe/{session\_id}`から取得可能
-* HTTP GETにより取得されるレシピはXMLで記述されている
-* `recipe\_id`はrecipe要素のidとして指定されている
+* `session_id`
+   * 書式:`{user_id}-{datetime}`
+     * `user_id`:ユーザー名
+        * 引数で指定する
+     * `datetime`:ログイン日時
+        * 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
+           * 例:`guest-2015.12.08_14.33.56.381162`
+   * `http://{chiffon_server["host"]}:{chiffon_server["port"]}/woz/session_id/{user_id}`から取得可能
+     * 上の方ほど日付が新しい
+     * 一番上に書かれているものを`session_id`として用いる
+* `recipe_id`
+   * 各レシピに割り当てられるID
+     * 例:`FriedRice_with_StarchySauce`
+   * `http://{chiffon_server["host"]}:{chiffon_server["port"]}/woz/recipe/{session_id}`から取得可能
+     * HTTP GETにより取得されるレシピはXMLで記述されている
+     * `recipe\_id`はrecipe要素のidとして指定されている
 
 
 
@@ -108,7 +122,7 @@ TableObjectManagerは外部のプログラムをスクリプト内部で呼び�
 
 ## 特徴量抽出
 
-プログラムの引数として`{input\_file}`,`{output\_file}`を渡す必要がある。`{input\_file}`には保存された画像のパス、`{output\_file}`には特徴量を保存するファイルのパスを指定する。`input\_file`には追加された画像ファイルのパス,`output\_file`は設定ファイルで指定されたディレクトリのパスをそれぞれ用いる。
+プログラムの引数として`{input_file}`,`{output_file}`を渡す必要がある。`{input_file}`には保存された画像のパス、`{output_file}`には特徴量を保存するファイルのパスを指定する。`input_file`には追加された画像ファイルのパス,`output_file`は設定ファイルで指定されたディレクトリのパスをそれぞれ用いる。
 
 
 
@@ -123,20 +137,20 @@ http://localhost:8080/ml/my_db/my_feature/svc/predict?json_data={${SAMPLE}, ${CL
 `{SAMPLE}`は以下のパラメータを持つ。
 
 * feature
-* サンプルの特徴量。
-* 前の特徴量抽出プログラムにより出力されたファイルの中身が入る。
+   * サンプルの特徴量。
+   * 前の特徴量抽出プログラムにより出力されたファイルの中身が入る。
 * id
-* 入力するサンプルのID。
-* 画像ファイルのbasenameを使う。
+   * 入力するサンプルのID。
+   * 画像ファイルのbasenameを使う。
 * group
-* グループタグの名前
-* 起動時の引数で指定した`group\_id`を配列の形で代入する。
+   * グループタグの名前
+   * 起動時の引数で指定した`group_id`を配列の形で代入する。
 
 `{CLASSIFIER-PARAMS}`は以下のパラメータを持つ。
 
 * name
-* 分類器の名前
-* `recipe\_id`(レシピ名)を入れる。
+   * 分類器の名前
+   * `recipe_id`(レシピ名)を入れる。
 
 
 
@@ -149,14 +163,14 @@ http://chiffon.mm.media.kyoto-u.ac.jp/receiver?sessionid={sessionid}&string={str
 ```
 
 * sessionid
-* 起動時引数で指定した`session\_id`と同一。
+   * 起動時引数で指定した`session_id`と同一。
 * string
-* 書式:`{"navigator":"object_acceess","action":{"target":{target},"name":{name},"timestamp":{timestamp}}}`
-* `target`:操作対象
-* server4recogから返ってきたjsonのハッシュから決まる
-* `name`:操作の内容
-* `touch`(物を掴む動作)あるいは`release`(物を手放す動作)
-* 画像の保存されるディレクトリ名から決まる
-* `timestamp`:クエリ送信日時
-* 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
-* 例:`{"navigator":"object_access","action":{"target":"knife_utensil","name":"release","timestamp":"2015.12.08_15.06.27.710000"}}`
+   * 書式:`{"navigator":"object_acceess","action":{"target":{target},"name":{name},"timestamp":{timestamp}}}`
+   * `target`:操作対象
+     * server4recogから返ってきたjsonのハッシュから決まる
+   * `name`:操作の内容
+     * `touch`(物を掴む動作)あるいは`release`(物を手放す動作)
+     * 画像の保存されるディレクトリ名から決まる
+   * `timestamp`:クエリ送信日時
+     * 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
+       * 例:`{"navigator":"object_access","action":{"target":"knife_utensil","name":"release","timestamp":"2015.12.08_15.06.27.710000"}}`
