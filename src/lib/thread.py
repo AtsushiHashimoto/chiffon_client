@@ -12,9 +12,9 @@ DIRNAME_LIST=["output_touch","output_release"]
 
 
 def process_loop(filepath_img,dict_conf):
-    result_feature=loop.feature_extract(filepath_img,dict_conf)
-    result_recog=loop.send_to_server4recog(filepath_img,dict_conf,result_feature)
-    loop.send_to_chiffon(filepath_img,dict_conf,result_feature)
+    result_feature=loop.featureExtraction(filepath_img,dict_conf)
+    result_recog=loop.sendToServer4recog(filepath_img,dict_conf,result_feature)
+    loop.sendToChiffon(filepath_img,dict_conf,result_feature)
 
 
 class ChangeHandler(FileSystemEventHandler):
@@ -28,7 +28,6 @@ class ChangeHandler(FileSystemEventHandler):
             print("New File '{filepath}' was detected.".format(filepath=event.src_path))
             proc_loop=multiprocessing.Process(target=process_loop,args=(event.src_path,self.dict_conf))
             proc_loop.start()
-
 
 def makeNewThreads(dict_conf):
     event_handler=ChangeHandler(dict_conf)

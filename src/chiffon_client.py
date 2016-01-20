@@ -7,10 +7,12 @@ if __name__=="__main__":
     PATH_CONFIG_CLIENT="chiffon_client.conf"
 
     # 設定用の辞書を作成(引数,設定ファイル)
-    dict_conf=lib.init.load_settings(PATH_CONFIG_CLIENT)
-    dict_conf["session_id"],dict_conf["recipe_id"]=lib.init.get_chiffonid(dict_conf)
+    # このとき拡張子の組の文字列をリストに変換
+    dict_conf=lib.init.loadSettings(PATH_CONFIG_CLIENT)
+    dict_conf["session_id"],dict_conf["recipe_id"]=lib.init.getChiffonId(dict_conf)
 
-    # ディレクトリ作成(TableObjectManager,FeatureExtractor),データ保存ディレクトリのパスを更新
+    # ディレクトリ作成(TableObjectManager,FeatureExtractorに用いる)
+    # 同時に辞書のデータ保存ディレクトリの値を絶対パスに更新
     lib.init.makeImageDir(dict_conf)
 
     # TableObjectManager起動

@@ -9,6 +9,7 @@ import datetime
 import glob
 
 
+
 def make_dict_conf(path_conf):
     dict_conf={}
     config=ConfigParser.ConfigParser()
@@ -18,6 +19,7 @@ def make_dict_conf(path_conf):
         for tuple_param in config.items(section):
             dict_conf[section][tuple_param[0]]=tuple_param[1]
     return dict_conf
+
 
 
 def get_url_request(domain,port,list_path,dict_query=[]):
@@ -42,6 +44,7 @@ def get_recipe_id(url):
     return elem_root.attrib["id"]
 
 
+
 def convert_to_cygpath(path):
     return subprocess.call(["cygpath","-w",path])
 
@@ -49,6 +52,7 @@ def callproc_cyg(path_exec,list_args):
     path_exec_cyg=convert_to_cygpath(path)
     list_cmd=[path_exec]+list_args
     return subprocess.call(list_cmd)
+
 
 
 def get_files_from_exts(path_dir,list_exts):
@@ -66,8 +70,10 @@ def get_time_stamp(str_fmt):
     return time_now.strftime(str_fmt)
 
 
+
 def get_ext(filename):
     return os.path.splitext(filename)[-1].lower()
+
 
 
 def makedirs_ex(path_dir):
