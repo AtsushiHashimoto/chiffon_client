@@ -22,7 +22,8 @@
    * 各種設定を記述したconfファイル
 * lib/
    * chiffon_client.pyで用いるライブラリを置くディレクトリ
-
+* s4r_convtable.csv
+   * server4recogの認識結果を対応する語彙セットに変換するためのテーブル(csv形式)
 
 ### 引数
 
@@ -75,6 +76,7 @@ default_group=image_feature_extractor_v1
 host=10.236.170.190
 port=8080
 path=/ml/my_db/my_feature/svc/predict
+path_convtable=/Users/kitchen/pytest/src/s4r_convtable.csv
 
 [chiffon_server]
 host=chiffon.mm.media.kyoto-u.ac.jp
@@ -155,6 +157,23 @@ http://localhost:8080/ml/my_db/my_feature/svc/predict?json_data={${SAMPLE}, ${CL
 * name
    * 分類器の名前
    * `recipe_id`(レシピ名)を入れる
+
+
+### objectidへの変換
+
+server4recogから返ってくる認識結果は以下の様なjsonである。
+
+```
+{"tomato":0.4,"banana":0.3,...}
+```
+
+この認識結果のクラス名はCHIFFONへ渡す際に変換テーブル(`s4r_convtable.csv`)を用いてレシピのobjectidに変換される。テーブル用のcsvファイルは以下のように記述する。
+
+```
+tomato,トマト
+banana,バナナ
+...
+```
 
 
 

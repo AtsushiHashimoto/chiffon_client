@@ -57,7 +57,7 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature):
     if(dict_conf["product_env"]["is_product"]=="1"):
         result_recog=myutils.get_http_result(url_recog)
     else:
-        result_recog=""
+        result_recog={"tomato":"1"}
     print("Recognition by server4recog has been completed.")
 
     return result_recog
@@ -65,6 +65,11 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature):
 
 
 # 認識結果をCHIFFONにHTTPで渡す
+def convert_recjson_to_idjson(result_recog,dict_conf):
+    dict_id={}
+    for k in result_recog.keys():
+        dict_id[k]=dict_conf["serv4recog"]["convtable"][k]
+    return dict_id
 
 def make_dict_query_ch(filepath_img,result_recog,dict_conf):
     dir_img=os.path.dirname(filepath_img)
@@ -79,7 +84,8 @@ def make_url_chiffon(filepath_img,result_recog,dict_conf):
     return url_chiffon
 
 def sendToChiffon(filepath_img,dict_conf,result_recog):
-    url_chiffon=make_url_chiffon(filepath_img,result_recog,dict_conf)
+    dict_recog=convert_recjson_to_idjson(result_recog,dict_conf)
+    url_chiffon=make_url_chiffon(filepath_img,dict_recog,dict_conf)
     print("URL(chiffon)..."+url_chiffon)
 
     if(dict_conf["product_env"]["is_product"]=="1"):

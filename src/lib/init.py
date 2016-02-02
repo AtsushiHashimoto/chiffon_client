@@ -3,7 +3,7 @@ import myutils
 
 import argparse
 import os
-
+import csv
 
 
 LIST_NAME_DIR_EXEC=["table_object_manager","image_feature_extractor"]
@@ -29,6 +29,13 @@ def loadSettings(path_conf):
 
     dict_conf["table_object_manager"]["fileexts"]=dict_conf["table_object_manager"]["fileexts"].split(",")
 
+    dict_conf["serv4recog"]["convtable"]={}
+    filepath_table_csv=dict_conf["serv4recog"]["path_convtable"]
+    with open(filepath_table_csv,"r") as f:
+        reader_table=csv.reader(f,delimiter=",")
+        for row in reader_table:
+            dict_conf["serv4recog"]["convtable"][row[0]]=row[1]
+    
     return dict_conf
 
 
