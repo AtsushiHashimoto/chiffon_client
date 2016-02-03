@@ -5,14 +5,13 @@
 ### 処理の流れ
 
 1. 設定ファイル(`chiffon_client.conf`)の読み込み
-2. `user_id`を基にCHIFFONサーバから`session_id`,`recipe_id`を取得
-3. 画像保存用ディレクトリを作成
+2. スクリプトの引数で指定した`user_id`を基にCHIFFONサーバから`session_id`,`recipe_id`を取得
+3. 画像,特徴量を保存するディレクトリを作成
 4. TableObjectManagerを起動
-5. 特定の画像保存用ディレクトリに保存された画像を随時チェック
-6. 特徴抽出用プログラムに保存された画像を渡し、特徴量を保存
+5. TableObjectManagerによって保存された画像を随時チェック
+6. 5.で検知された画像を特徴抽出用プログラムに渡し、特徴量を取得,保存
 7. 6.で得た特徴量をserver4recog(認識用プログラム)にHTTPで送信し認識結果を取得
 8. 7.で得た認識結果をHTTPでCHIFFONに送信する
-
 
 ### 関連ファイル
 
@@ -20,10 +19,10 @@
    * 一連の処理を行うPythonスクリプトファイル
 * chiffon_client.conf
    * 各種設定を記述したconfファイル
-* lib/
-   * chiffon_client.pyで用いるライブラリを置くディレクトリ
 * s4r_convtable.csv
    * server4recogの認識結果を対応する語彙セットに変換するためのテーブル(csv形式)
+* lib/
+   * chiffon_client.pyで用いるライブラリを置くディレクトリ
 
 ### 引数
 
@@ -42,7 +41,6 @@ python chiffon_cient.py user_id grouptag [grouptag ...]
    * 複数指定可能
      * 但し最低1つは必要
 
-
 ### 設定ファイルの記述
 
 ```
@@ -55,17 +53,18 @@ output_root=/Users/kitchen/pytest/src/data
 path_exec=/Users/kitchen/pytest/src/TableObjectManager.exe
 # TableObjectManager実行時に渡すオプション引数
 default_options=-d 0 --gpu_device 0 -v false
-# TableObjectManagerによる出力のディレクトリ
+# TableObjectManagerによる出力ファイルのディレクトリ
 output_touch=table_object_manager/PUT
 output_release=table_object_manager/TAKEN
 # 画像拡張子一覧
 fileexts=.jpg,.png,.gif,.bmp,.tif
 
 [image_feature_extractor]
-# TableObjectManagerの絶対パス
+# 特徴抽出プログラムの絶対パス
 path_exec=/Users/kitchen/pytest/src/ImageFeatureExtractor.exe
+# 特徴抽出プログラム実行時に渡すオプション引数
 default_options=-s 256:256 -p /Users/kitchen/sample_data/imagenet_val.prototxt -m /Users/kitchen/sample_data/bvlc_reference_rcnn_ilsvrc13.caffemodel
-# 特徴抽出プログラムによる出力ディレクトリ
+# 特徴抽出プログラムによる出力ファイルディレクトリ
 output_touch=image_feature_extractor/touch
 output_release=image_feature_extractor/release
 # 抽出する特徴量の種類の名前
@@ -76,6 +75,7 @@ default_group=image_feature_extractor_v1
 host=10.236.170.190
 port=8080
 path=/ml/my_db/my_feature/svc/predict
+# objectid変換テーブル(csvファイル)の絶対パス
 path_convtable=/Users/kitchen/pytest/src/s4r_convtable.csv
 
 [chiffon_server]
@@ -97,32 +97,32 @@ is_product=0
 
 ## CHIFFONからの情報の取得
 
-スクリプト起動時にCHIFFONから引数で指定した`user_id`を基に`session_id`,`recipe_id`を取得する。
+スクリプト起動時に引数で指定した`user_id`を基にCHIFFONから`session_id`,`recipe_id`を取得する。
 
 * `session_id`
    * 書式:`{user_id}-{datetime}`
      * `user_id`:ユーザー名
-        * 引数で指定する
+        * スクリプト起動時の引数で指定する
      * `datetime`:ログイン日時
         * 書式:`yyyy.MM.dd_HH.MM.ss.ffffff`
            * 例:`guest-2015.12.08_14.33.56.381162`
    * `http://{chiffon_server["host"]}:{chiffon_server["port"]}/woz/session_id/{user_id}`から取得可能
-     * 上の方ほど日付が新しい
-     * 一番上に書かれているものを`session_id`として用いる
+     * 取得できる`session_id`は複数で、上の方ほど日付が新しい
+     * 一番上に書かれているものを用いる
 * `recipe_id`
    * 各レシピに割り当てられるID
      * 例:`FriedRice_with_StarchySauce`
    * `http://{chiffon_server["host"]}:{chiffon_server["port"]}/woz/recipe/{session_id}`から取得可能
-     * HTTP GETにより取得されるレシピはXMLで記述されている
+     * レシピはXMLで記述されている
      * `recipe_id`はrecipe要素のidとして指定されている
 
 
 
 ## TableObjectManager起動
 
-TableObjectManagerはスクリプト内部で呼び出して実行する。実行ファイルのパスの指定場所は設定ファイルで指定する。後述の特徴量抽出プログラムも同様。
+TableObjectManagerはスクリプト内部で呼び出しされる。実行ファイルのパスは設定ファイルで指定する。後述の特徴量抽出プログラムも同様。
 
-引数として画像を保存するディレクトリを指定する必要があるが、これはスクリプト内で設定ファイル内のディレクトリ名を絶対パスに変換して指定する。その他の引数は設定ファイルで指定する。
+引数として画像を保存するディレクトリを指定する必要があるが、これは設定ファイル内のディレクトリ名を絶対パスに変換したものを指定する。その他の引数は設定ファイルで指定する。
 
 
 
@@ -158,7 +158,6 @@ http://localhost:8080/ml/my_db/my_feature/svc/predict?json_data={${SAMPLE}, ${CL
    * 分類器の名前
    * `recipe_id`(レシピ名)を入れる
 
-
 ### objectidへの変換
 
 server4recogから返ってくる認識結果は以下の様なjsonである。
@@ -167,7 +166,7 @@ server4recogから返ってくる認識結果は以下の様なjsonである。
 {"tomato":0.4,"banana":0.3,...}
 ```
 
-この認識結果のクラス名はCHIFFONへ渡す際に変換テーブル(`s4r_convtable.csv`)を用いてレシピのobjectidに変換される。テーブル用のcsvファイルは以下のように記述する。
+この認識結果のクラス名はCHIFFONへ渡す際に変換テーブル(`s4r_convtable.csv`)に基づいてレシピのobjectidに変換される。テーブル用のcsvファイルは以下のように記述する。
 
 ```
 tomato,トマト
