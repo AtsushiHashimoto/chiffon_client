@@ -9,9 +9,10 @@
 3. 画像,特徴量を保存するディレクトリを作成
 4. TableObjectManagerを起動
 5. TableObjectManagerによって保存された画像を随時チェック
-6. 5.で検知された画像を特徴抽出用プログラムに渡し、特徴量を取得,保存
-7. 6.で得た特徴量をserver4recog(認識用プログラム)にHTTPで送信し認識結果を取得
-8. 7.で得た認識結果をHTTPでCHIFFONに送信する
+6. 5.で検知された画像を256*256にサイズ変更
+7. 6.で編集した画像を特徴抽出用プログラムに渡し、特徴量を取得,保存
+8. 7.で得た特徴量をserver4recog(認識用プログラム)にHTTPで送信し認識結果を取得
+9. 8.で得た認識結果をHTTPでCHIFFONに送信する
 
 ### 関連ファイル
 
@@ -54,10 +55,17 @@ path_exec=/Users/kitchen/pytest/src/TableObjectManager.exe
 # TableObjectManager実行時に渡すオプション引数
 default_options=-d 0 --gpu_device 0 -v false
 # TableObjectManagerによる出力ファイルのディレクトリ
+output_rawimage=table_object_manager/raw
 output_touch=table_object_manager/PUT
 output_release=table_object_manager/TAKEN
 # 画像拡張子一覧
 fileexts=.jpg,.png,.gif,.bmp,.tif
+
+[object_region_box_extractor]
+path_exev=/Users/kitchen/pytest/src/BoxExtractor.exe
+output_touch=object_region_box_extractor/PUT
+output_release=object_region_box_extractor/TAKEN
+default_options= --bg_color=0:0:0 --min_width 128
 
 [image_feature_extractor]
 # 特徴抽出プログラムの絶対パス
@@ -120,9 +128,17 @@ is_product=0
 
 ## TableObjectManager起動
 
-TableObjectManagerはスクリプト内部で呼び出しされる。実行ファイルのパスは設定ファイルで指定する。後述の特徴量抽出プログラムも同様。
+TableObjectManagerはスクリプト内部で呼び出しされる。実行ファイルのパスは設定ファイルで指定する。後述の画像リサイズ,特徴量抽出プログラムも同様。
 
 引数として画像を保存するディレクトリを指定する必要があるが、これは設定ファイル内のディレクトリ名を絶対パスに変換したものを指定する。その他の引数は設定ファイルで指定する。
+
+
+
+## 画像のリサイズ
+
+TableObjectManagerにより保存される画像は2種類ある。内1つは無編集の画像で、もう1つは対象物以外にマスクをかけたものである。この2つの画像を用いて256*256にリサイズした物体の画像を生成するプログラムをスクリプトから呼び出す。
+
+引数として保存された2種類の画像のパスと出力する画像のパスを指定する必要がある。検出される画像はマスクをかけられた方の画像であり、このファイル名からもう1つの無編集の画像のパスを特定する。その他の引数は設定ファイルで指定する。
 
 
 

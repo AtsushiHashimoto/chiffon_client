@@ -6,8 +6,7 @@ import os
 import csv
 
 
-LIST_NAME_DIR_EXEC=["table_object_manager","image_feature_extractor"]
-LIST_NAME_DIR_OUT=["output_touch","output_release"]
+LIST_NAME_DIR_EXEC={"table_object_manager":["output_touch","output_release","output_rawimage"],"object_region_box_extractor":["output_touch","output_release"],"image_feature_extractor":["output_touch","output_release"]}
 
 
 
@@ -68,8 +67,8 @@ def getChiffonId(dict_conf):
 # 辞書内のディレクトリ名も絶対パスに更新
 
 def makeImageDir(dict_conf):
-    for name_dir_exec in LIST_NAME_DIR_EXEC:
-        for name_dir_out in LIST_NAME_DIR_OUT:
+    for name_dir_exec in LIST_NAME_DIR_EXEC.keys():
+        for name_dir_out in LIST_NAME_DIR_EXEC[name_dir_exec]:
             abspath_dir=os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"],dict_conf[name_dir_exec][name_dir_out])
             myutils.makedirs_ex(abspath_dir)
             dict_conf[name_dir_exec][name_dir_out]=abspath_dir

@@ -3,6 +3,20 @@ import myutils
 
 import os
 import json
+import re
+
+# 縮小済みの画像(256*256)を取得
+def getUnMaskedImage(filepath_img_masked,dict_conf):
+    imgname_masked=os.path.basename(filepath_img_masked)
+    imgname_unmasked=re.match("_[0-9]+_",imgname_masked).group(1)[1:-1]+myutils.get_ext(imgname_masked)
+    imgpath_unmasked=os.path.join(os.dirname(dict_conf["table_object_manager"]["output_rawimage"]),imgname_unmasked)
+    imgdir_output=os.path.dirname(filepath_img_masked).split("/")[-1]
+    imgdir_output_base="".join(dict_conf["object_region_box_extractor"]["output_touch"].split("/")[:-2])
+    imgpath_ouput=os.path.join(imgdir_output_base,imgdir_output,imfname_unmasked)
+    list_imgpath=[imgpath_unmasked,filepath_img_masked,imgpath_output]
+    list_opt=[myutils.convert_to_cygpath(filepath_img)]+list_imgpath+dict_conf["object_region_box_extractor"]["default_options"].split()
+    imgpath_output=myutils.callproc_cyg(dict_conf["object_region_box_extractor"]["path_exec"],list_opt)
+    return imgpath_output
 
 
 

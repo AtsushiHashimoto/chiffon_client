@@ -11,7 +11,8 @@ from watchdog.observers import Observer
 DIRNAME_LIST=["output_touch","output_release"]
 
 
-def process_loop(filepath_img,dict_conf):
+def process_loop(filepath_img_masked,dict_conf):
+    filepath_img=loop.getUnMaskedImage(filepath_img_masked,dict_conf)
     result_feature=loop.featureExtraction(filepath_img,dict_conf)
     result_recog=loop.sendToServer4recog(filepath_img,dict_conf,result_feature)
     loop.sendToChiffon(filepath_img,dict_conf,result_recog)
