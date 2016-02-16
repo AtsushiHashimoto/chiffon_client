@@ -4,6 +4,7 @@ import myutils
 import os
 import json
 import re
+import requests
 
 # 縮小済みの画像(256*256)を取得
 def getUnMaskedImage(filepath_img_masked,dict_conf):
@@ -65,11 +66,14 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature):
     else:
         feature_extracted="".join(result_feature)
 
-    url_recog=make_url_server4recog(filepath_img,feature_extracted,dict_conf)
+    # url_recog=make_url_server4recog(filepath_img,feature_extracted,dict_conf)
+    url_recog="http://{domain}:{port}{path}".format(domain=dict_conf["serv4recog"]["host"],port=dict_conf["serv4recog"]["port"],path=dict_conf["serv4recog"]["path"])
+    dict_query=make_dict_query_s4r(filepath_img,feature_extracted,dict_conf)
     print("URL(server4recog)..."+url_recog)
 
     if(dict_conf["product_env"]["is_product"]=="1"):
-        result_recog=myutils.get_http_result(url_recog)
+        result_recog=json.loads(requests.post(url_recog,data=dict_query).text)
+        # result_recog=myutils.get_http_result(url_recog)
     else:
         result_recog={"tomato":"1"}
     print("Recognition by server4recog has been completed.")
