@@ -102,8 +102,15 @@ def make_url_chiffon(filepath_img,result_recog,dict_conf):
     return url_chiffon
 
 def sendToChiffon(filepath_img,dict_conf,result_recog):
-    dict_recog=convert_recjson_to_idjson(result_recog,dict_conf)
-    url_chiffon=make_url_chiffon(filepath_img,dict_recog,dict_conf)
+    # dict_recog=convert_recjson_to_idjson(result_recog,dict_conf)
+    # url_chiffon=make_url_chiffon(filepath_img,dict_recog,dict_conf)
+
+    dir_img=os.path.dirname(filepath_img)
+    timestamp=myutils.get_time_stamp(dict_conf["chiffon_server"]["timestamp"])
+    dict_string={"navigator":dict_conf["chiffon_server"]["navigator"],"action":{"target":result_recog,"name":dir_img,"timestamp":timestamp}}
+    dict_query={"session_id":dict_conf["session_id"],"string":json.dumps(dict_string)}
+
+    url_chiffon=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_receiver"]],dict_query)
     print("URL(chiffon)..."+url_chiffon)
 
     if(dict_conf["product_env"]["is_product"]=="1"):
