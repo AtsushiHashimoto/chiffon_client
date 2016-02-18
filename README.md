@@ -25,6 +25,14 @@
 * lib/
    * chiffon_client.pyで用いるライブラリを置くディレクトリ
 
+### インストール
+
+pip でいくつかのパッケージを追加でインストールする。
+```
+pip install watchdog
+pip install requests
+```
+
 ### 引数
 
 スクリプトは以下の様に引数を指定して起動する。
