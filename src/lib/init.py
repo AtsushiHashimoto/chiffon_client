@@ -80,7 +80,7 @@ def makeImageDir(dict_conf):
 # TableObjectManager起動
 
 def make_list_args_TOM(dict_conf):
-    if(dict_conf["product_env"]["is_product"]=="1"):
+    if(dict_conf["product_env"]["use_cygpath"]=="1"):
         list_args_dir=[ "--output_dir_for_put",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_touch"]),
                         "--output_dir_for_taken",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_release"]),
                         "--output_dir_for_background",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_rawimage"]),
@@ -104,7 +104,7 @@ def make_list_args_TOM(dict_conf):
 
 def startTableObjectManager(dict_conf):
     list_args_TOM=make_list_args_TOM(dict_conf)
-    if(dict_conf["product_env"]["is_product"]=="1"):
+    if(dict_conf["product_env"]["enable_table_object_manager"]=="1"):
         myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_args_TOM)
 
     print("TableObjectManager is started.")

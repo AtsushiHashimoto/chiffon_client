@@ -49,7 +49,8 @@ def convert_to_cygpath(path):
     return subprocess.call(["cygpath","-w",path])
 
 def callproc_cyg(path_exec,list_args):
-    path_exec_cyg=convert_to_cygpath(path)
+    if(dict_conf["product_env"]["use_cygpath"]=="1"):
+        path_exec_cyg=convert_to_cygpath(path_exec)
     list_cmd=[path_exec]+list_args
     return subprocess.call(list_cmd)
 
@@ -62,7 +63,7 @@ def get_files_from_exts(path_dir,list_exts):
         if not list_file is None:
             list_files.extend(list_file)
     return list_files
-    
+
 
 
 def get_time_stamp(str_fmt):

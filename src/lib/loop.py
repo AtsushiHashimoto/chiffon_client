@@ -44,7 +44,7 @@ def getUnMaskedImage(filepath_img_masked,dict_conf):
 def make_results_FE(list_path_images,dict_conf):
     result_feature=[]
     for filepath_img in list_path_images:
-        if(dict_conf["product_env"]["is_product"]=="1"):
+        if(dict_conf["product_env"]["use_cygpath"]=="1"):
             list_opt=[myutils.convert_to_cygpath(filepath_img)]+dict_conf["image_feature_extractor"]["default_options"].split()
             result_feature.append(myutils.callproc_cyg(dict_conf["image_feature_extractor"]["path_exec"],list_opt))
         else:
