@@ -1,0 +1,52 @@
+[chiffon_client]
+# chiffon_clientが利用する全保存先ディレクトリのroot
+output_root=C:\Users\nananeko\Documents\chiffon_client\src\data
+
+[table_object_manager]
+# TableObjectManagerの絶対パス
+path_exec=C:\Users\nananeko\Documents\chiffon_client\src\TableObjectManager.exe
+default_options=-d 0 --gpu_device 0 -v false
+# TableObjectManagerによる出力のディレクトリ
+output_rawimage=table_object_manager/raw
+output_touch=table_object_manager/PUT
+output_release=table_object_manager/TAKEN
+# 画像拡張子一覧
+fileexts=.jpg,.png,.gif,.bmp,.tif
+
+[object_region_box_extractor]
+path_exev=C:\Users\nananeko\Documents\chiffon_client\src\BoxExtractor.exe
+output_touch=object_region_box_extractor/PUT
+output_release=object_region_box_extractor/TAKEN
+default_options= --bg_color=0:0:0 --min_width 128
+
+[image_feature_extractor]
+# TableObjectManagerの絶対パス
+path_exec=C:\Users\nananeko\Documents\chiffon_client\src/ImageFeatureExtractor.exe
+default_options=-s 256:256 -p /Users/kitchen/sample_data/imagenet_val.prototxt -m /Users/kitchen/sample_data/bvlc_reference_rcnn_ilsvrc13.caffemodel
+# 特徴抽出プログラムによる出力ディレクトリ
+output_touch=image_feature_extractor/touch
+output_release=image_feature_extractor/release
+# 抽出する特徴量の種類の名前
+feature_name=ilsvrc13
+default_group=image_feature_extractor_v1
+
+[serv4recog]
+host=kusk.mm.media.kyoto-u.ac.jp
+port=80
+path=/s4r/ml/kusk_object/ilsvrc13_128/svc/predict
+path_convtable=C:\Users\nananeko\Documents\chiffon_client\src\s4r_convtable.csv
+
+[chiffon_server]
+host=chiffon.mm.media.kyoto-u.ac.jp
+path_sessionid=/woz/session_id/
+path_recipe=/woz/recipe/
+path_receiver=/receiver
+port=80
+path=/release
+navigator=object_access
+timestamp=%y.%m.%d_%H.%M.%S
+
+[product_env]
+# 本番環境なら1を指定
+is_product=0
+
