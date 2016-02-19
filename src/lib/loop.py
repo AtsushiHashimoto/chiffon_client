@@ -117,9 +117,13 @@ def featureExtraction(filepath_img,dict_conf):
 
 # 得た特徴をserver4recogにHTTPで渡す
 def make_dict_query_s4r(filepath_img,feature_extracted,dict_conf):
-    dir_img=os.path.dirname(filepath_img)
+    dir_img=os.path.basename(filepath_img)
     list_group=[dict_conf["user_id"],dict_conf["recipe_id"],dict_conf["session_id"],dict_conf["image_feature_extractor"]["default_group"]]+dict_conf["grouptag"]
-    dict_json_data={"feature":feature_extracted,"id:":dir_img,"group":list_group,"name":dict_conf["recipe_id"]}
+
+    feature_list_as_string = feature_extracted.strip().rstrip(",").replace(" ", "").split(",") # リスト形式
+    formatted_feature_extracted = [float(x) for x in feature_list_as_string] # 各値を float に変換
+
+    dict_json_data={"feature":formatted_feature_extracted,"id:":dir_img,"group":list_group,"name":dict_conf["recipe_id"]}
     dict_query={"json_data":json.dumps(dict_json_data)}
     return dict_query
 
@@ -131,19 +135,23 @@ def make_url_server4recog(filepath_img,feature_extracted,dict_conf):
 
 
 def sendToServer4recog(filepath_img,dict_conf,result_feature):
-    if(dict_conf["product_env"]["is_product"]=="1"):
-        with open(filepath_output) as f:
-            feature_extracted=f.open()
-    else:
-        feature_extracted="".join(result_feature)
+    #if(dict_conf["product_env"]["is_product"]=="1"):
+    #    with open(filepath_output) as f:
+    #        feature_extracted=f.open()
+    #else:
+    #    feature_extracted="".join(result_feature)
 
-    # url_recog=make_url_server4recog(filepath_img,feature_extracted,dict_conf)
     url_recog="http://{domain}:{port}{path}".format(domain=dict_conf["serv4recog"]["host"],port=dict_conf["serv4recog"]["port"],path=dict_conf["serv4recog"]["path"])
-    dict_query=make_dict_query_s4r(filepath_img,feature_extracted,dict_conf)
+    dict_query=make_dict_query_s4r(filepath_img,result_feature,dict_conf)
     print("URL(server4recog)..."+url_recog)
+    # print(dict_query)
 
-    if(dict_conf["product_env"]["is_product"]=="1"):
-        result_recog=json.loads(requests.post(url_recog,data=dict_query).text)
+    if(dict_conf["product_env"]["enable_server4recog"]=="1"):
+        response = requests.get(url_recog,params=dict_query)
+
+        print(response.text)
+
+        result_recog=json.loads(response.text)
         # result_recog=myutils.get_http_result(url_recog)
     else:
         result_recog={"tomato":"1"}

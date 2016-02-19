@@ -21,7 +21,7 @@ def process_loop(filepath_img_masked,dict_conf):
 class ChangeHandler(FileSystemEventHandler):
     def __init__(self,dict_conf):
         self.dict_conf=dict_conf
-    
+
     def on_created(self, event):
         if event.is_directory:
             return
