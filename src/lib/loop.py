@@ -34,10 +34,11 @@ def getUnMaskedImage(filepath_img_masked,dict_conf):
     # 実行
     list_imgpath=[bgimage_path, filepath_img_masked, imgpath_output]
     list_opt = list_imgpath + dict_conf["object_region_box_extractor"]["default_options"].split()
-    imgpath_output=myutils.callproc_cyg(dict_conf["object_region_box_extractor"]["path_exec"],list_opt)
-    return imgpath_output
-
-
+    retcode=myutils.callproc_cyg(dict_conf["object_region_box_extractor"]["path_exec"],list_opt)
+    if(retcode == 0):
+        return imgpath_output
+    else :
+        return ""
 
 # 取得した画像を特徴抽出プログラムに渡して実行
 
