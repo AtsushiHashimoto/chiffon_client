@@ -6,9 +6,11 @@ import os
 import csv
 
 
-LIST_NAME_DIR_EXEC={"table_object_manager":["output_touch","output_release","output_rawimage"],"object_region_box_extractor":["output_touch","output_release"],"image_feature_extractor":["output_touch","output_release"]}
-
-
+LIST_NAME_DIR_EXEC={
+    "table_object_manager":["output_touch","output_release","output_rawimage"],
+    "object_region_box_extractor":["output_touch","output_release"],
+    "image_feature_extractor":["output_touch","output_release"]
+    }
 
 # 引数,設定ファイルから設定に関する辞書を作成
 # 拡張子の組の文字列をリストに変換
@@ -34,7 +36,7 @@ def loadSettings(path_conf):
         reader_table=csv.reader(f,delimiter=",")
         for row in reader_table:
             dict_conf["serv4recog"]["convtable"][row[0]]=row[1]
-    
+
     return dict_conf
 
 
@@ -79,9 +81,21 @@ def makeImageDir(dict_conf):
 
 def make_list_args_TOM(dict_conf):
     if(dict_conf["product_env"]["is_product"]=="1"):
-        list_args_dir=["-P",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_touch"]),"-T",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_release"])]
+        list_args_dir=[ "--output_dir_for_put",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_touch"]),
+                        "--output_dir_for_taken",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_release"]),
+                        "--output_dir_for_background",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_rawimage"]),
+                        "--workspace_end_filename",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["workspace_end_filename"]),
+                        # TODO use input param for debug only
+                        "--input","C:\ChiffonClient\TableObjectManager\camA.mp4",
+                        ]
     else:
-        list_args_dir=["-P",dict_conf["table_object_manager"]["output_touch"],"-T",dict_conf["table_object_manager"]["output_release"]]
+        list_args_dir=[ "--output_dir_for_put",dict_conf["table_object_manager"]["output_touch"],
+                        "--output_dir_for_taken",dict_conf["table_object_manager"]["output_release"],
+                        "--output_dir_for_background",dict_conf["table_object_manager"]["output_rawimage"],
+                        "--workspace_end_filename",dict_conf["table_object_manager"]["workspace_end_filename"],
+                        # TODO use input param for debug only
+                        "--input","C:\ChiffonClient\TableObjectManager\camA.mp4",
+                        ]
 
     list_args_opt=dict_conf["table_object_manager"]["default_options"].split()
     list_args_TOM=list_args_dir+list_args_opt
