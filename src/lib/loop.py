@@ -5,6 +5,7 @@ import os
 import json
 import re
 import requests
+import subprocess
 
 # 縮小済みの画像(256*256)を取得
 # Put + 1 => bg の番号
@@ -28,6 +29,7 @@ def getUnMaskedImage(filepath_img_masked,dict_conf):
     bgimage_path=os.path.join(dict_conf["table_object_manager"]["output_rawimage"],bgimage_filename)
 
     # 縮小済み画像の出力先パス・ファイル名の作成
+    # TODO PUT/TAKEN の切り替え
     extractor_path=os.path.join(base_dir, dict_conf["object_region_box_extractor"]["output_touch"])
     imgpath_output=os.path.join(extractor_path, maskedimage_filename)
 
@@ -42,27 +44,73 @@ def getUnMaskedImage(filepath_img_masked,dict_conf):
 
 # 取得した画像を特徴抽出プログラムに渡して実行
 
-def make_results_FE(list_path_images,dict_conf):
-    result_feature=[]
-    for filepath_img in list_path_images:
-        if(dict_conf["product_env"]["use_cygpath"]=="1"):
-            list_opt=[myutils.convert_to_cygpath(filepath_img)]+dict_conf["image_feature_extractor"]["default_options"].split()
-            result_feature.append(myutils.callproc_cyg(dict_conf["image_feature_extractor"]["path_exec"],list_opt))
-        else:
-            list_opt=[filepath_img]+dict_conf["image_feature_extractor"]["default_options"].split()
-            result_feature.append(" ".join([dict_conf["image_feature_extractor"]["path_exec"]]+list_opt))
-    return result_feature
+def make_results_FE(filepath_img,dict_conf):
+    path_exec = dict_conf["image_feature_extractor"]["path_exec"]
+
+    if(dict_conf["product_env"]["use_cygpath"]=="1"):
+        filepath_img = myutils.convert_to_cygpath(filepath_img)
+        path_exec = myutils.convert_to_cygpath(path_exec)
+
+    if(dict_conf["product_env"]["enable_image_feature_extractor"]=="1"):
+        # 特徴量抽出プログラムの実行
+        list_cmds = [path_exec, filepath_img] + dict_conf["image_feature_extractor"]["default_options"].split()
+
+        p = subprocess.Popen(
+            list_cmds,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
+        (stdoutdata, stderrdata) = p.communicate()
+
+        # stdoutdata = subprocess.check_output(list_cmds)
+
+        if(int(p.returncode) == 0):
+            # 標準出力に出る特徴量
+            result_feature = stdoutdata
+
+            # 特徴量のフォルダに置換
+            file_abspath_img = os.path.abspath(filepath_img)
+            if(file_abspath_img.find(dict_conf["object_region_box_extractor"]["output_touch"]) > -1):
+                image_feature_extractor_path = file_abspath_img.replace(dict_conf["object_region_box_extractor"]["output_touch"], dict_conf["image_feature_extractor"]["output_touch"])
+            elif(file_abspath_img.find(dict_conf["object_region_box_extractor"]["output_release"]) > -1):
+                image_feature_extractor_path = file_abspath_img.replace(dict_conf["object_region_box_extractor"]["output_release"], dict_conf["image_feature_extractor"]["output_release"])
+            else :
+                raise OnError("Illegal Path:" + file_abspath_img)
+
+            # ファイルの拡張子を特徴量用のものに変換
+            for ext in dict_conf["table_object_manager"]["fileexts"]:
+                if(image_feature_extractor_path.rfind(ext) > -1):
+                    image_feature_extractor_path = image_feature_extractor_path.replace(ext, dict_conf["image_feature_extractor"]["fileext"])
+                    break
+
+            # ファイルへ書き出し。
+            try:
+                f = open(image_feature_extractor_path, 'w')
+                f.write(result_feature)
+            except IOError:
+                print '"%s" cannot be opened.' % image_feature_extractor_path
+            finally:
+                f.close()
+
+            return result_feature
+    else:
+        list_opt=[filepath_img]+dict_conf["image_feature_extractor"]["default_options"].split()
+        result_feature = " ".join([dict_conf["image_feature_extractor"]["path_exec"]]+list_opt)
+        return result_feature
 
 
+# 特徴量の抽出
+# 特徴量を抽出する別実行ファイルの制約で、一時的にカレントディレクトリを移動する処理がある。
 def featureExtraction(filepath_img,dict_conf):
-    abspath_dir_image=os.path.abspath(os.path.dirname(filepath_img))
-    list_path_images=myutils.get_files_from_exts(abspath_dir_image,dict_conf["table_object_manager"]["fileexts"])
-    result_feature=make_results_FE(list_path_images,dict_conf)
-    print("Feature extraction has been completed.")
-    # TODO save feature as file
-    # TODO need to define file name
-    print(result_feature)
+    cwd = os.getcwd()
 
+    path_exec = dict_conf["image_feature_extractor"]["path_exec"]
+    os.chdir(os.path.dirname(path_exec))
+
+    result_feature=make_results_FE(filepath_img,dict_conf)
+
+    os.chdir(cwd)
+    print("Feature extraction has been completed.")
     return result_feature
 
 

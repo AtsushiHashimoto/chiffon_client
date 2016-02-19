@@ -49,8 +49,8 @@ def convert_to_cygpath(path):
     return subprocess.call(["cygpath","-w",path])
 
 def callproc_cyg(path_exec,list_args):
-    if(dict_conf["product_env"]["use_cygpath"]=="1"):
-        path_exec_cyg=convert_to_cygpath(path_exec)
+    # if(dict_conf["product_env"]["use_cygpath"]=="1"):
+    #     path_exec_cyg=convert_to_cygpath(path_exec)
     list_cmd=[path_exec]+list_args
     return subprocess.call(list_cmd)
 
