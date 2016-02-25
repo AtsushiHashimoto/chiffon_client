@@ -86,16 +86,12 @@ def make_list_args_TOM(dict_conf):
                         "--output_dir_for_taken",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_release"]),
                         "--output_dir_for_background",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_rawimage"]),
                         "--workspace_end_filename",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["workspace_end_filename"]),
-                        # TODO use input param for debug only
-                        "--input","C:\ChiffonClient\TableObjectManager\camA.mp4",
                         ]
     else:
         list_args_dir=[ "--output_dir_for_put",dict_conf["table_object_manager"]["output_touch"],
                         "--output_dir_for_taken",dict_conf["table_object_manager"]["output_release"],
                         "--output_dir_for_background",dict_conf["table_object_manager"]["output_rawimage"],
                         "--workspace_end_filename",dict_conf["table_object_manager"]["workspace_end_filename"],
-                        # TODO use input param for debug only
-                        "--input","C:\ChiffonClient\TableObjectManager\camA.mp4",
                         ]
 
     list_args_opt=dict_conf["table_object_manager"]["default_options"].split()
