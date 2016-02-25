@@ -81,3 +81,12 @@ def makedirs_ex(path_dir):
     if not os.path.isdir(path_dir):
         os.makedirs(path_dir)
         print("New directory '{path_dir}' was made.".format(path_dir=path_dir))
+
+def output_to_file(path, content):
+    try:
+        f = open(path, 'w')
+        f.write(content)
+    except IOError:
+        print '"%s" cannot be opened.' % path
+    finally:
+        f.close()

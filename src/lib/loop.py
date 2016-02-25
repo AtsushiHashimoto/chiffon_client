@@ -84,13 +84,7 @@ def make_results_FE(filepath_img,dict_conf):
                     break
 
             # ファイルへ書き出し。
-            try:
-                f = open(image_feature_extractor_path, 'w')
-                f.write(result_feature)
-            except IOError:
-                print '"%s" cannot be opened.' % image_feature_extractor_path
-            finally:
-                f.close()
+            myutils.output_to_file(image_feature_extractor_path, result_feature)
 
             return result_feature
     else:
