@@ -49,6 +49,7 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
 
     # 実行
     list_imgpath=[bgimage_path, filepath_img_masked, imgpath_output]
+    logger.debug(str(list_imgpath))
     list_opt = list_imgpath + dict_conf["object_region_box_extractor"]["default_options"].split()
 
     timeout = 0
@@ -176,7 +177,7 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature, mode):
 
     logtime = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
     logger.info("URL(server4recog): "+url_recog)
-    logger.debug(dict_query)
+    logger.debug("Query(server4recog): " + dict_query)
     # myutils.output_to_file(log_output_path, "[%s] %s %s" % (logtime, url_recog, dict_query))
 
     if(dict_conf["product_env"]["enable_server4recog"]=="1"):
