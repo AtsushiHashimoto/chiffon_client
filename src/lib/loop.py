@@ -90,11 +90,11 @@ def make_results_FE(filepath_img,dict_conf, mode):
 
 
 # 特徴量の抽出
-# 特徴量を抽出する別実行ファイルの制約で、一時的にカレントディレクトリを移動する処理がある。
+# 特徴量を抽出する別実行ファイルの制約で、一時別のカレントディレクトリに移動する処理がある。
 def featureExtraction(filepath_img,dict_conf, mode):
     cwd = os.getcwd()
 
-    path_exec = dict_conf["image_feature_extractor"]["path_exec"]
+    path_exec = dict_conf["image_feature_extractor"]["working_dir"]
     os.chdir(os.path.dirname(path_exec))
 
     result_feature=make_results_FE(filepath_img,dict_conf, mode)
