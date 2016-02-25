@@ -81,7 +81,7 @@ def get_ext(filename):
 def makedirs_ex(path_dir):
     if not os.path.isdir(path_dir):
         os.makedirs(path_dir)
-        logger.info("New directory '{path_dir}' was made.".format(path_dir=path_dir))
+        logger.info("Create directory: {path_dir}".format(path_dir=path_dir))
 
 def output_to_file(path, content):
     try:
