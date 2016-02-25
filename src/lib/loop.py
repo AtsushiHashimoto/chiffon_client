@@ -177,7 +177,7 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature, mode):
 
     logtime = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
     logger.info("URL(server4recog): "+url_recog)
-    logger.debug("Query(server4recog): " + dict_query)
+    logger.debug("Query(server4recog): " + str(dict_query))
     # myutils.output_to_file(log_output_path, "[%s] %s %s" % (logtime, url_recog, dict_query))
 
     if(dict_conf["product_env"]["enable_server4recog"]=="1"):
