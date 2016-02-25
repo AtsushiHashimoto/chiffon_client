@@ -1,9 +1,16 @@
 # -*- coding:utf-8 -*-
+import logging
+import logging.config
+logging.config.fileConfig('logging.conf')
+logger = logging.getLogger("ChiffonClient")
+logging.getLogger("requests").setLevel(logging.WARNING)
+
 import lib.init
 import lib.thread
 import os
 
 if __name__=="__main__":
+
 
     PATH_CONFIG_CLIENT="chiffon_client.conf"
 
@@ -20,6 +27,7 @@ if __name__=="__main__":
     output_to = open(log_file_path, 'w')
     # TableObjectManager起動
     p = lib.init.startTableObjectManager(dict_conf, output_to)
+    logger.info("Table Object Manager is started.")
 
     # ループ(画像取得->スレッド作成)
     try:
@@ -27,7 +35,7 @@ if __name__=="__main__":
     except Exception:
         pass
     finally:
-        print("end")
+        logger.info("End")
         p.kill();
         output_to.flush();
         output_to.close();

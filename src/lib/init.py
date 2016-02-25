@@ -6,6 +6,9 @@ import os
 import csv
 import subprocess
 
+import logging
+logger = logging.getLogger("ChiffonClient")
+
 LIST_NAME_DIR_EXEC={
     "table_object_manager":["output_touch","output_release","output_rawimage"],
     "object_region_box_extractor":["output_touch","output_release"],
@@ -47,14 +50,14 @@ def loadSettings(path_conf):
 def get_sessionid(dict_conf):
     url_session=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_sessionid"],dict_conf["user_id"]])
     session_id=myutils.get_session_id(url_session)
-    print("session_id:{session_id}".format(session_id=session_id))
+    logger.info("session_id: {session_id}".format(session_id=session_id))
     return session_id
 
 
 def get_recipeid(dict_conf,session_id):
     url_recipe=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_recipe"],session_id])
     recipe_id=myutils.get_recipe_id(url_recipe)
-    print("recipe_id:{recipe_id}".format(recipe_id=recipe_id))
+    logger.info("recipe_id: {recipe_id}".format(recipe_id=recipe_id))
     return recipe_id
 
 
@@ -109,5 +112,4 @@ def startTableObjectManager(dict_conf, output_to):
             stderr=subprocess.STDOUT
         )
 
-    print("TableObjectManager is started.")
     return p

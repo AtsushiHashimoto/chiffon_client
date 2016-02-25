@@ -10,6 +10,9 @@ import datetime
 import locale
 import time
 
+import logging
+logger = logging.getLogger("ChiffonClient")
+
 # 縮小済みの画像(256*256)を取得
 # Put + 1 => bg の番号
 
@@ -18,6 +21,8 @@ import time
 # コマンド実行のサンプル
 # ExtractObjectBoxRegion.exe ..\bg_0002837.png ..\putobject_0002836_027.png ..\output.png
 def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
+    logger.info("Start getUnMaskedImage")
+
     # %output_root%\%SESSION_ID%
     base_dir = os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"])
 
@@ -55,8 +60,10 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
 
     retcode=myutils.callproc_cyg(dict_conf["object_region_box_extractor"]["path_exec"],list_opt)
     if(retcode == 0):
+        logger.info("End getUnMaskedImage")
         return imgpath_output
     else :
+        logger.warn("Fail getUnMaskedImage")
         return ""
 
 # 取得した画像を特徴抽出プログラムに渡して実行
@@ -71,6 +78,8 @@ def make_results_FE(filepath_img,dict_conf, mode):
     if(dict_conf["product_env"]["enable_image_feature_extractor"]=="1"):
         # 特徴量抽出プログラムの実行
         list_cmds = [path_exec, filepath_img] + dict_conf["image_feature_extractor"]["default_options"].split()
+
+        logger.debug(str(list_cmds))
 
         p = subprocess.Popen(
             list_cmds,
@@ -108,15 +117,18 @@ def make_results_FE(filepath_img,dict_conf, mode):
 # 特徴量の抽出
 # 特徴量を抽出する別実行ファイルの制約で、一時別のカレントディレクトリに移動する処理がある。
 def featureExtraction(filepath_img,dict_conf, mode):
+    logger.info("Start featureExtraction")
     cwd = os.getcwd()
 
     path_exec = dict_conf["image_feature_extractor"]["working_dir"]
+    logger.debug("Change directory: " + path_exec)
     os.chdir(os.path.dirname(path_exec))
 
     result_feature=make_results_FE(filepath_img,dict_conf, mode)
 
     os.chdir(cwd)
-    print("Feature extraction has been completed.")
+    logger.debug("Change directory: " + cwd)
+    logger.info("End featureExtraction")
     return result_feature
 
 
@@ -163,14 +175,15 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature, mode):
     dict_query=make_dict_query_s4r(filepath_img,result_feature,dict_conf)
 
     logtime = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-    print("URL(server4recog)..."+url_recog)
-    # print(dict_query)
-    myutils.output_to_file(log_output_path, "[%s] %s %s" % (logtime, url_recog, dict_query))
+    logger.info("URL(server4recog): "+url_recog)
+    logger.debug(dict_query)
+    # myutils.output_to_file(log_output_path, "[%s] %s %s" % (logtime, url_recog, dict_query))
 
     if(dict_conf["product_env"]["enable_server4recog"]=="1"):
         response = requests.get(url_recog,params=dict_query)
+        myutils.output_to_file(log_output_path, "%s" % response.url)
 
-        print(response.text)
+        logger.debug(response.text)
         # ファイルへ書き出し。
         myutils.output_to_file(output_path, response.text)
 
@@ -178,7 +191,7 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature, mode):
         # result_recog=myutils.get_http_result(url_recog)
     else:
         result_recog={"tomato":"1"}
-    print("Recognition by server4recog has been completed.")
+    logger.info("Recognition by server4recog has been completed.")
 
     return result_recog
 
@@ -219,13 +232,11 @@ def sendToChiffon(filepath_img,dict_conf,result_recog, mode):
     # if(dict_conf["product_env"]["is_product"]=="1"):
 
     url = "http://{domain}:{port}{path}".format(domain=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path=dict_conf["chiffon_server"]["path_receiver"])
-    print("URL(chiffon)..."+url)
+    logger.info("URL(chiffon): "+url)
     response = requests.get(url,params=dict_query)
 
-    print(response.text)
+    logger.debug(response.text)
     result=json.loads(response.text)
 
     if ("status" in result) and (result["status"] == "success"):
-        print("Result from server4recog has been successfully sent to CHIFFON server.")
-    else :
-        print(response.text)
+        logger.info("Result from server4recog has been successfully sent to CHIFFON server.")

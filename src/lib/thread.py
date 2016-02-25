@@ -8,6 +8,8 @@ import time
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+import logging
+logger = logging.getLogger("ChiffonClient")
 
 DIRNAME_LIST=["output_touch","output_release"]
 
@@ -27,7 +29,7 @@ class ChangeHandler(FileSystemEventHandler):
         if event.is_directory:
             return
         if myutils.get_ext(event.src_path) in self.dict_conf["table_object_manager"]["fileexts"]:
-            print("New File '{filepath}' was detected.".format(filepath=event.src_path))
+            logger.info("New File '{filepath}' was detected.".format(filepath=event.src_path))
 
             file_abspath_img = os.path.abspath(event.src_path)
             if(file_abspath_img.find(self.dict_conf["table_object_manager"]["output_touch"]) > -1):
