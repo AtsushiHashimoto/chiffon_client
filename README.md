@@ -20,6 +20,8 @@
    * 一連の処理を行うPythonスクリプトファイル
 * chiffon_client.conf
    * 各種設定を記述したconfファイル
+* logging.conf
+   * ログ出力設定を記述したファイル
 * s4r_convtable.csv
    * server4recogの認識結果を対応する語彙セットに変換するためのテーブル(csv形式)
 * lib/
@@ -55,44 +57,55 @@ python chiffon_cient.py user_id grouptag [grouptag ...]
 ```
 [chiffon_client]
 # chiffon_clientが利用する全保存先ディレクトリのroot
-output_root=/Users/kitchen/pytest/src/data
+output_root=C:\ChiffonClient\ChiffonClient\src\data
 
 [table_object_manager]
 # TableObjectManagerの絶対パス
-path_exec=/Users/kitchen/pytest/src/TableObjectManager.exe
-# TableObjectManager実行時に渡すオプション引数
-default_options=-d 0 --gpu_device 0 -v false
-# TableObjectManagerによる出力ファイルのディレクトリ
-output_rawimage=table_object_manager/raw
-output_touch=table_object_manager/PUT
-output_release=table_object_manager/TAKEN
+path_exec=C:\ChiffonClient\bin\TableObjectManager.exe
+default_options=-d 0 --gpu_device 0 -v false --input C:\ChiffonClient\TableObjectManager\camA.mp4
+# TableObjectManagerによる出力のディレクトリ
+output_rawimage=table_object_manager\raw
+output_touch=table_object_manager\PUT
+output_release=table_object_manager\TAKEN
+output_log=table_object_manager\table_object_manager.log
+# 作業領域認識用マスク画像のパス
+workspace_end_filename=C:\ChiffonClient\TableObjectManager\workspace_end_cameraA.png
 # 画像拡張子一覧
 fileexts=.jpg,.png,.gif,.bmp,.tif
 
 [object_region_box_extractor]
-path_exev=/Users/kitchen/pytest/src/BoxExtractor.exe
-output_touch=object_region_box_extractor/PUT
-output_release=object_region_box_extractor/TAKEN
-default_options= --bg_color=0:0:0 --min_width 128
+path_exec=C:\ChiffonClient\bin\ExtractObjectBoxRegion.exe
+output_touch=object_region_box_extractor\PUT
+output_release=object_region_box_extractor\TAKEN
+default_options=
+# --bg_color=0:0:0 --min_width 128
 
 [image_feature_extractor]
-# 特徴抽出プログラムの絶対パス
-path_exec=/Users/kitchen/pytest/src/ImageFeatureExtractor.exe
-# 特徴抽出プログラム実行時に渡すオプション引数
-default_options=-s 256:256 -p /Users/kitchen/sample_data/imagenet_val.prototxt -m /Users/kitchen/sample_data/bvlc_reference_rcnn_ilsvrc13.caffemodel
-# 特徴抽出プログラムによる出力ファイルディレクトリ
-output_touch=image_feature_extractor/touch
-output_release=image_feature_extractor/release
+# TableObjectManagerの絶対パス
+path_exec=C:\ChiffonClient\bin\sample_Mat2VecCNN.exe
+working_dir=C:\ChiffonClient\bin\
+default_options=-s 256:256 -p C:\ChiffonClient\bin\sample_data\imagenet_val.prototxt -m C:\ChiffonClient\bin\sample_data\bvlc_reference_rcnn_ilsvrc13.caffemodel
+# 特徴抽出プログラムによる出力ディレクトリ
+output_touch=image_feature_extractor\touch
+output_release=image_feature_extractor\release
+# 拡張子
+fileext=.csv
 # 抽出する特徴量の種類の名前
 feature_name=ilsvrc13
 default_group=image_feature_extractor_v1
 
 [serv4recog]
-host=10.236.170.190
-port=8080
-path=/ml/my_db/my_feature/svc/predict
-# objectid変換テーブル(csvファイル)の絶対パス
-path_convtable=/Users/kitchen/pytest/src/s4r_convtable.csv
+host=kusk.mm.media.kyoto-u.ac.jp
+port=80
+path=/s4r/ml/kusk_object/ilsvrc13_128/svc/predict
+# 結果保存用ディレクトリ
+output_touch=serv4recog\touch
+output_release=serv4recog\release
+# 拡張子
+logfileext=.log
+fileext=.json
+# 名称変換テーブル
+path_convtable=C:\ChiffonClient\ChiffonClient\src\s4r_convtable.csv
 
 [chiffon_server]
 host=chiffon.mm.media.kyoto-u.ac.jp
@@ -100,13 +113,25 @@ path_sessionid=/woz/session_id/
 path_recipe=/woz/recipe/
 path_receiver=/receiver
 port=80
+path=/release
 navigator=object_access
-# TimeStampの書式
-timestamp=yyyy.MM.dd_HH.MM.ss.ffffff
+timestamp=%Y.%m.%d_%H.%M.%S.%f
+# 結果保存用ディレクトリ
+output_touch=chiffon_server\touch
+output_release=chiffon_server\release
+# 拡張子
+logfileext=.log
+fileext=.json
 
 [product_env]
-# 本番環境なら1を指定
-is_product=0
+# Cygwin 環境下で Cygpath を使用する場合、1 にする。
+use_cygpath=0
+# table_object_manager を利用する場合、1 にする。
+enable_table_object_manager=1
+# image_feature_extractor を利用する場合、1 にする。
+enable_image_feature_extractor=1
+# Server4recog を利用する場合、1 にする。
+enable_server4recog=1
 ```
 
 
@@ -222,3 +247,80 @@ http://chiffon.mm.media.kyoto-u.ac.jp/receiver?sessionid={sessionid}&string={str
    * `timestamp`:クエリ送信日時
      * 設定ファイルで指定したものを用いる
        * 例:`{"navigator":"object_access","action":{"target":"knife_utensil","name":"release","timestamp":"2015.12.08_15.06.27.710000"}}`
+
+## 出力ファイルについて
+出力ディレクトリ名、拡張子は設定ファイルに準じます。
+出力ファイル名は、table_object_manager が出力したファイル名に準じます。
+
+### ディレクトリ構造
+* data
+   * [SESSION_ID]
+     * chiffon_server
+       * release
+       * touch
+     * image_feature_extractor
+       * release
+       * touch
+     * object_region_box_extractor
+       * PUT
+       * TAKEN
+     * serv4recog
+       * release
+       * touch
+     * table_object_manager
+       * PUT
+       * raw
+       * TAKEN
+
+### table_object_manager
+table_object_manager が生成する、背景画像と背景差分画像を出力するディレクトリ。
+
+* table_object_manager
+  * PUT
+    * putobject_0000046_000.png - 物を置いた際の差分画像
+  * raw
+    * bg_0000003.png - 背景差分の基準となる背景画像
+  * TAKEN
+    * takenobject_0000175_001.png - 物を取った際の差分画像
+  * table_object_manager.log - table_object_manager の出力するログ
+
+### object_region_box_extractor
+特徴量抽出のために、差分が生じた部分を切り出した画像を出力するディレクトリ。
+
+* object_region_box_extractor
+  * PUT
+　　* putobject_0000046_000.png
+  * TAKEN
+    * takenobject_0000175_001.png
+### image_feature_extractor
+切り出し済みの画像を用いて、特徴量を CSV 形式で出力する。
+
+* image_feature_extractor
+  * release
+    * takenobject_0000175_001.csv
+  * touch
+    * putobject_0000046_000.csv
+
+### serv4recog
+認識用プログラムに特徴量を渡す際の URL + クエリとその結果を保存するディレクトリ。
+url + クエリは .log ファイル、結果は .json ファイルに記載する。
+
+* serv4recog
+  * release
+    * takenobject_0000175_001.json
+    * takenobject_0000175_001.log
+  * touch
+    * putobject_0000046_000.json
+    * putobject_0000046_000.log
+
+### chiffon_server
+認識用プログラムから得た結果を Chiffon Server に渡す際の URL + クエリとその結果を保存するディレクトリ。
+url + クエリは .log ファイル、結果は .json ファイルに記載する。
+
+* chiffon_server
+  * release
+    * takenobject_0000175_001.json
+    * takenobject_0000175_001.log
+  * touch
+    * putobject_0000046_000.json
+    * putobject_0000046_000.log
