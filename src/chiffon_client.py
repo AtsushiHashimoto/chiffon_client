@@ -30,3 +30,4 @@ if __name__=="__main__":
         print("end")
         p.kill();
         output_to.flush();
+        output_to.close();
