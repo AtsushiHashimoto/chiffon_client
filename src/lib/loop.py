@@ -123,13 +123,13 @@ def featureExtraction(filepath_img,dict_conf, mode):
 
 # 得た特徴をserver4recogにHTTPで渡す
 def make_dict_query_s4r(filepath_img,feature_extracted,dict_conf):
-    dir_img=os.path.basename(filepath_img)
+    query_id=dict_conf["session_id"] + "-" + os.path.basename(filepath_img)
     list_group=[dict_conf["user_id"],dict_conf["recipe_id"],dict_conf["session_id"],dict_conf["image_feature_extractor"]["default_group"]]+dict_conf["grouptag"]
 
     feature_list_as_string = feature_extracted.strip().rstrip(",").replace(" ", "").split(",") # リスト形式
     formatted_feature_extracted = [float(x) for x in feature_list_as_string] # 各値を float に変換
 
-    dict_json_data={"feature":formatted_feature_extracted,"id":dir_img,"group":list_group,"name":dict_conf["recipe_id"]}
+    dict_json_data={"feature":formatted_feature_extracted,"id":query_id,"group":list_group,"name":dict_conf["recipe_id"]}
     dict_query={"json_data":json.dumps(dict_json_data)}
     return dict_query
 
