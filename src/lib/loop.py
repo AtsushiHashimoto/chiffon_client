@@ -8,6 +8,7 @@ import requests
 import subprocess
 import datetime
 import locale
+import time
 
 # 縮小済みの画像(256*256)を取得
 # Put + 1 => bg の番号
@@ -25,7 +26,14 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
     pattern=re.compile("(_[0-9]+_)")
     frame_number_astext = pattern.search(maskedimage_filename).group(1)[1:-1]
     number_length = len(frame_number_astext)
-    frame_number = str(int(frame_number_astext) + 1) # 背景画像は次の番号になる。
+
+    if mode == "output_touch":
+        # 背景画像は次の番号になる。
+        frame_gap = 1
+    elif mode == "output_release":
+        # 背景画像は前の番号になる。
+        frame_gap = -1
+    frame_number = str(int(frame_number_astext) + frame_gap)
 
     bgimage_filename = "bg_" + frame_number.zfill(number_length) + myutils.get_ext(maskedimage_filename)
     bgimage_path=os.path.join(dict_conf["table_object_manager"]["output_rawimage"],bgimage_filename)
@@ -37,6 +45,14 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
     # 実行
     list_imgpath=[bgimage_path, filepath_img_masked, imgpath_output]
     list_opt = list_imgpath + dict_conf["object_region_box_extractor"]["default_options"].split()
+
+    timeout = 0
+    while not os.path.exists(bgimage_path):
+        time.sleep(1)
+        if timeout > 10:
+            break
+        timeout = timeout + 1
+
     retcode=myutils.callproc_cyg(dict_conf["object_region_box_extractor"]["path_exec"],list_opt)
     if(retcode == 0):
         return imgpath_output
