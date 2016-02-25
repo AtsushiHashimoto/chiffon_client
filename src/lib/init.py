@@ -4,7 +4,7 @@ import myutils
 import argparse
 import os
 import csv
-
+import subprocess
 
 LIST_NAME_DIR_EXEC={
     "table_object_manager":["output_touch","output_release","output_rawimage"],
@@ -106,6 +106,12 @@ def make_list_args_TOM(dict_conf):
 def startTableObjectManager(dict_conf):
     list_args_TOM=make_list_args_TOM(dict_conf)
     if(dict_conf["product_env"]["enable_table_object_manager"]=="1"):
-        myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_args_TOM)
+        # myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_args_TOM)
+        p = subprocess.Popen(
+            [dict_conf["table_object_manager"]["path_exec"]] + list_args_TOM,
+            # stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
 
     print("TableObjectManager is started.")
+    return p

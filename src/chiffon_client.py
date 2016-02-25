@@ -16,7 +16,13 @@ if __name__=="__main__":
     lib.init.makeImageDir(dict_conf)
 
     # TableObjectManager起動
-    lib.init.startTableObjectManager(dict_conf)
+    p = lib.init.startTableObjectManager(dict_conf)
 
     # ループ(画像取得->スレッド作成)
-    lib.thread.makeNewThreads(dict_conf)
+    try:
+        lib.thread.makeNewThreads(dict_conf)
+    except Exception:
+        pass
+    finally:
+        print("end")
+        p.kill();
