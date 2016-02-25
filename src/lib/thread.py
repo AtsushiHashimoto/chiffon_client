@@ -2,6 +2,7 @@
 import loop
 import myutils
 
+import os
 import multiprocessing
 import time
 from watchdog.events import FileSystemEventHandler
@@ -11,11 +12,11 @@ from watchdog.observers import Observer
 DIRNAME_LIST=["output_touch","output_release"]
 
 
-def process_loop(filepath_img_masked,dict_conf):
-    filepath_img=loop.getUnMaskedImage(filepath_img_masked,dict_conf)
-    result_feature=loop.featureExtraction(filepath_img,dict_conf)
-    result_recog=loop.sendToServer4recog(filepath_img,dict_conf,result_feature)
-    loop.sendToChiffon(filepath_img,dict_conf,result_recog)
+def process_loop(filepath_img_masked,dict_conf, mode):
+    filepath_img=loop.getUnMaskedImage(filepath_img_masked,dict_conf, mode)
+    result_feature=loop.featureExtraction(filepath_img,dict_conf, mode)
+    result_recog=loop.sendToServer4recog(filepath_img,dict_conf,result_feature, mode)
+    loop.sendToChiffon(filepath_img,dict_conf,result_recog, mode)
 
 
 class ChangeHandler(FileSystemEventHandler):
@@ -27,7 +28,16 @@ class ChangeHandler(FileSystemEventHandler):
             return
         if myutils.get_ext(event.src_path) in self.dict_conf["table_object_manager"]["fileexts"]:
             print("New File '{filepath}' was detected.".format(filepath=event.src_path))
-            proc_loop=multiprocessing.Process(target=process_loop,args=(event.src_path,self.dict_conf))
+
+            file_abspath_img = os.path.abspath(event.src_path)
+            if(file_abspath_img.find(self.dict_conf["table_object_manager"]["output_touch"]) > -1):
+                mode = "output_touch"
+            elif(file_abspath_img.find(self.dict_conf["table_object_manager"]["output_release"]) > -1):
+                mode = "output_release"
+            else :
+                raise OnError("Illegal Path:" + file_abspath_img)
+
+            proc_loop=multiprocessing.Process(target=process_loop,args=(event.src_path,self.dict_conf, mode))
             proc_loop.start()
 
 

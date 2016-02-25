@@ -6,6 +6,8 @@ import json
 import re
 import requests
 import subprocess
+import datetime
+import locale
 
 # 縮小済みの画像(256*256)を取得
 # Put + 1 => bg の番号
@@ -14,7 +16,7 @@ import subprocess
 # ExtractObjectBoxRegion.exe whole_input_image object_image output_image
 # コマンド実行のサンプル
 # ExtractObjectBoxRegion.exe ..\bg_0002837.png ..\putobject_0002836_027.png ..\output.png
-def getUnMaskedImage(filepath_img_masked,dict_conf):
+def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
     # %output_root%\%SESSION_ID%
     base_dir = os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"])
 
@@ -29,8 +31,15 @@ def getUnMaskedImage(filepath_img_masked,dict_conf):
     bgimage_path=os.path.join(dict_conf["table_object_manager"]["output_rawimage"],bgimage_filename)
 
     # 縮小済み画像の出力先パス・ファイル名の作成
-    # TODO PUT/TAKEN の切り替え
-    extractor_path=os.path.join(base_dir, dict_conf["object_region_box_extractor"]["output_touch"])
+    # file_abspath_img = os.path.abspath(filepath_img_masked)
+    # if(file_abspath_img.find(dict_conf["table_object_manager"]["output_touch"]) > -1):
+    #    param = "output_touch"
+    #elif(file_abspath_img.find(dict_conf["table_object_manager"]["output_release"]) > -1):
+    #    param = "output_release"
+    #else :
+    #    raise OnError("Illegal Path:" + file_abspath_img)
+
+    extractor_path=os.path.join(base_dir, dict_conf["object_region_box_extractor"][mode])
     imgpath_output=os.path.join(extractor_path, maskedimage_filename)
 
     # 実行
@@ -44,7 +53,7 @@ def getUnMaskedImage(filepath_img_masked,dict_conf):
 
 # 取得した画像を特徴抽出プログラムに渡して実行
 
-def make_results_FE(filepath_img,dict_conf):
+def make_results_FE(filepath_img,dict_conf, mode):
     path_exec = dict_conf["image_feature_extractor"]["path_exec"]
 
     if(dict_conf["product_env"]["use_cygpath"]=="1"):
@@ -70,12 +79,7 @@ def make_results_FE(filepath_img,dict_conf):
 
             # 特徴量のフォルダに置換
             file_abspath_img = os.path.abspath(filepath_img)
-            if(file_abspath_img.find(dict_conf["object_region_box_extractor"]["output_touch"]) > -1):
-                image_feature_extractor_path = file_abspath_img.replace(dict_conf["object_region_box_extractor"]["output_touch"], dict_conf["image_feature_extractor"]["output_touch"])
-            elif(file_abspath_img.find(dict_conf["object_region_box_extractor"]["output_release"]) > -1):
-                image_feature_extractor_path = file_abspath_img.replace(dict_conf["object_region_box_extractor"]["output_release"], dict_conf["image_feature_extractor"]["output_release"])
-            else :
-                raise OnError("Illegal Path:" + file_abspath_img)
+            image_feature_extractor_path = file_abspath_img.replace(dict_conf["object_region_box_extractor"][mode], dict_conf["image_feature_extractor"][mode])
 
             # ファイルの拡張子を特徴量用のものに変換
             for ext in dict_conf["table_object_manager"]["fileexts"]:
@@ -95,13 +99,13 @@ def make_results_FE(filepath_img,dict_conf):
 
 # 特徴量の抽出
 # 特徴量を抽出する別実行ファイルの制約で、一時的にカレントディレクトリを移動する処理がある。
-def featureExtraction(filepath_img,dict_conf):
+def featureExtraction(filepath_img,dict_conf, mode):
     cwd = os.getcwd()
 
     path_exec = dict_conf["image_feature_extractor"]["path_exec"]
     os.chdir(os.path.dirname(path_exec))
 
-    result_feature=make_results_FE(filepath_img,dict_conf)
+    result_feature=make_results_FE(filepath_img,dict_conf, mode)
 
     os.chdir(cwd)
     print("Feature extraction has been completed.")
@@ -128,22 +132,39 @@ def make_url_server4recog(filepath_img,feature_extracted,dict_conf):
     return url_recog
 
 
-def sendToServer4recog(filepath_img,dict_conf,result_feature):
+def sendToServer4recog(filepath_img,dict_conf,result_feature, mode):
     #if(dict_conf["product_env"]["is_product"]=="1"):
     #    with open(filepath_output) as f:
     #        feature_extracted=f.open()
     #else:
     #    feature_extracted="".join(result_feature)
 
+    # ディレクトリパスを置換
+    file_abspath_img = os.path.abspath(filepath_img)
+    output_path = file_abspath_img.replace(dict_conf["object_region_box_extractor"][mode], dict_conf["serv4recog"][mode])
+
+    # ファイルの拡張子を特徴量用のものに変換
+    for ext in dict_conf["table_object_manager"]["fileexts"]:
+        if(output_path.rfind(ext) > -1):
+            log_output_path = output_path.replace(ext, dict_conf["serv4recog"]["logfileext"])
+            output_path = output_path.replace(ext, dict_conf["serv4recog"]["fileext"])
+            break
+
+
     url_recog="http://{domain}:{port}{path}".format(domain=dict_conf["serv4recog"]["host"],port=dict_conf["serv4recog"]["port"],path=dict_conf["serv4recog"]["path"])
     dict_query=make_dict_query_s4r(filepath_img,result_feature,dict_conf)
+
+    logtime = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
     print("URL(server4recog)..."+url_recog)
     # print(dict_query)
+    myutils.output_to_file(log_output_path, "[%s] %s %s" % (logtime, url_recog, dict_query))
 
     if(dict_conf["product_env"]["enable_server4recog"]=="1"):
         response = requests.get(url_recog,params=dict_query)
 
         print(response.text)
+        # ファイルへ書き出し。
+        myutils.output_to_file(output_path, response.text)
 
         result_recog=json.loads(response.text)
         # result_recog=myutils.get_http_result(url_recog)
@@ -156,11 +177,11 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature):
 
 
 # 認識結果をCHIFFONにHTTPで渡す
-def convert_recjson_to_idjson(result_recog,dict_conf):
-    dict_id={}
-    for k in result_recog.keys():
-        dict_id[k]=dict_conf["serv4recog"]["convtable"][k]
-    return dict_id
+def convert_recjson_to_idjson(recog_name,dict_conf):
+    if recog_name in dict_conf["serv4recog"]["convtable"]:
+        return dict_conf["serv4recog"]["convtable"][recog_name]
+    else :
+        return recog_name
 
 def make_dict_query_ch(filepath_img,result_recog,dict_conf):
     dir_img=os.path.dirname(filepath_img)
@@ -174,18 +195,29 @@ def make_url_chiffon(filepath_img,result_recog,dict_conf):
     url_chiffon=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_receiver"]],dict_query)
     return url_chiffon
 
-def sendToChiffon(filepath_img,dict_conf,result_recog):
+def sendToChiffon(filepath_img,dict_conf,result_recog, mode):
     # dict_recog=convert_recjson_to_idjson(result_recog,dict_conf)
     # url_chiffon=make_url_chiffon(filepath_img,dict_recog,dict_conf)
 
-    dir_img=os.path.dirname(filepath_img)
+    recog = result_recog["result"]["likelihood"]
+    target = max(recog.items(), key=lambda x:x[1])[0]
+    target = convert_recjson_to_idjson(target,dict_conf)
+
+    dir_img=mode.replace("output_", "")
     timestamp=myutils.get_time_stamp(dict_conf["chiffon_server"]["timestamp"])
-    dict_string={"navigator":dict_conf["chiffon_server"]["navigator"],"action":{"target":result_recog,"name":dir_img,"timestamp":timestamp}}
-    dict_query={"session_id":dict_conf["session_id"],"string":json.dumps(dict_string)}
+    dict_string={"navigator":dict_conf["chiffon_server"]["navigator"],"action":{"target":target,"name":dir_img,"timestamp":timestamp}}
+    dict_query={"sessionid":dict_conf["session_id"],"string":json.dumps(dict_string)}
 
     url_chiffon=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_receiver"]],dict_query)
     print("URL(chiffon)..."+url_chiffon)
 
-    if(dict_conf["product_env"]["is_product"]=="1"):
-        get_http_result(url_chiffon)
+    # if(dict_conf["product_env"]["is_product"]=="1"):
+    # myutils.get_http_result(url_chiffon)
+
+    url = "http://{domain}:{port}{path}".format(domain=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path=dict_conf["chiffon_server"]["path_receiver"])
+    print("URL(chiffon)..."+url)
+    response = requests.get(url,params=dict_query)
+
+    print(response.text)
+
     print("Result from server4recog has been successfully sent to CHIFFON server.")
