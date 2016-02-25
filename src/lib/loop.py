@@ -31,14 +31,6 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
     bgimage_path=os.path.join(dict_conf["table_object_manager"]["output_rawimage"],bgimage_filename)
 
     # 縮小済み画像の出力先パス・ファイル名の作成
-    # file_abspath_img = os.path.abspath(filepath_img_masked)
-    # if(file_abspath_img.find(dict_conf["table_object_manager"]["output_touch"]) > -1):
-    #    param = "output_touch"
-    #elif(file_abspath_img.find(dict_conf["table_object_manager"]["output_release"]) > -1):
-    #    param = "output_release"
-    #else :
-    #    raise OnError("Illegal Path:" + file_abspath_img)
-
     extractor_path=os.path.join(base_dir, dict_conf["object_region_box_extractor"][mode])
     imgpath_output=os.path.join(extractor_path, maskedimage_filename)
 
@@ -208,16 +200,16 @@ def sendToChiffon(filepath_img,dict_conf,result_recog, mode):
     dict_string={"navigator":dict_conf["chiffon_server"]["navigator"],"action":{"target":target,"name":dir_img,"timestamp":timestamp}}
     dict_query={"sessionid":dict_conf["session_id"],"string":json.dumps(dict_string)}
 
-    url_chiffon=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_receiver"]],dict_query)
-    print("URL(chiffon)..."+url_chiffon)
-
     # if(dict_conf["product_env"]["is_product"]=="1"):
-    # myutils.get_http_result(url_chiffon)
 
     url = "http://{domain}:{port}{path}".format(domain=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path=dict_conf["chiffon_server"]["path_receiver"])
     print("URL(chiffon)..."+url)
     response = requests.get(url,params=dict_query)
 
     print(response.text)
+    result=json.loads(response.text)
 
-    print("Result from server4recog has been successfully sent to CHIFFON server.")
+    if ("status" in result) and (result["status"] == "success"):
+        print("Result from server4recog has been successfully sent to CHIFFON server.")
+    else :
+        print(response.text)
