@@ -225,18 +225,33 @@ def sendToChiffon(filepath_img,dict_conf,result_recog, mode):
     target = max(recog.items(), key=lambda x:x[1])[0]
     target = convert_recjson_to_idjson(target,dict_conf)
 
+    logger.info("Recog: " + target)
+
     dir_img=mode.replace("output_", "")
     timestamp=myutils.get_time_stamp(dict_conf["chiffon_server"]["timestamp"])
     dict_string={"navigator":dict_conf["chiffon_server"]["navigator"],"action":{"target":target,"name":dir_img,"timestamp":timestamp}}
     dict_query={"sessionid":dict_conf["session_id"],"string":json.dumps(dict_string)}
 
+    # ディレクトリパスを置換
+    file_abspath_img = os.path.abspath(filepath_img)
+    output_path = file_abspath_img.replace(dict_conf["object_region_box_extractor"][mode], dict_conf["chiffon_server"][mode])
+    # ファイルの拡張子を特徴量用のものに変換
+    for ext in dict_conf["table_object_manager"]["fileexts"]:
+        if(output_path.rfind(ext) > -1):
+            log_output_path = output_path.replace(ext, dict_conf["chiffon_server"]["logfileext"])
+            output_path = output_path.replace(ext, dict_conf["chiffon_server"]["fileext"])
+            break
+
     # if(dict_conf["product_env"]["is_product"]=="1"):
 
     url = "http://{domain}:{port}{path}".format(domain=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path=dict_conf["chiffon_server"]["path_receiver"])
     logger.info("URL(chiffon): "+url)
+    logger.debug("Query(chiffon): "+str(dict_query))
     response = requests.get(url,params=dict_query)
+    myutils.output_to_file(log_output_path, "%s" % response.url)
 
     logger.debug(response.text)
+    myutils.output_to_file(output_path, response.text)
     result=json.loads(response.text)
 
     if ("status" in result) and (result["status"] == "success"):

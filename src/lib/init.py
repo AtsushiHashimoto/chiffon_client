@@ -14,6 +14,7 @@ LIST_NAME_DIR_EXEC={
     "object_region_box_extractor":["output_touch","output_release"],
     "image_feature_extractor":["output_touch","output_release"],
     "serv4recog":["output_touch","output_release"],
+    "chiffon_server":["output_touch","output_release"],
     }
 
 # 引数,設定ファイルから設定に関する辞書を作成
