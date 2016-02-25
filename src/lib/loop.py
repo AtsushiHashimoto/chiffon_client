@@ -113,7 +113,7 @@ def make_dict_query_s4r(filepath_img,feature_extracted,dict_conf):
     feature_list_as_string = feature_extracted.strip().rstrip(",").replace(" ", "").split(",") # リスト形式
     formatted_feature_extracted = [float(x) for x in feature_list_as_string] # 各値を float に変換
 
-    dict_json_data={"feature":formatted_feature_extracted,"id:":dir_img,"group":list_group,"name":dict_conf["recipe_id"]}
+    dict_json_data={"feature":formatted_feature_extracted,"id":dir_img,"group":list_group,"name":dict_conf["recipe_id"]}
     dict_query={"json_data":json.dumps(dict_json_data)}
     return dict_query
 
