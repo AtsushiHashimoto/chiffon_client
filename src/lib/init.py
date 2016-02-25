@@ -99,13 +99,13 @@ def make_list_args_TOM(dict_conf):
     return list_args_TOM
 
 
-def startTableObjectManager(dict_conf):
+def startTableObjectManager(dict_conf, output_to):
     list_args_TOM=make_list_args_TOM(dict_conf)
     if(dict_conf["product_env"]["enable_table_object_manager"]=="1"):
         # myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_args_TOM)
         p = subprocess.Popen(
             [dict_conf["table_object_manager"]["path_exec"]] + list_args_TOM,
-            # stdout=subprocess.PIPE,
+            stdout=output_to,
             stderr=subprocess.STDOUT
         )
 

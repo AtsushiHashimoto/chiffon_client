@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import lib.init
 import lib.thread
+import os
 
 if __name__=="__main__":
 
@@ -15,8 +16,10 @@ if __name__=="__main__":
     # 同時に辞書のデータ保存ディレクトリの値を絶対パスに更新
     lib.init.makeImageDir(dict_conf)
 
+    log_file_path = os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"],dict_conf['table_object_manager']['output_log'])
+    output_to = open(log_file_path, 'w')
     # TableObjectManager起動
-    p = lib.init.startTableObjectManager(dict_conf)
+    p = lib.init.startTableObjectManager(dict_conf, output_to)
 
     # ループ(画像取得->スレッド作成)
     try:
@@ -26,3 +29,4 @@ if __name__=="__main__":
     finally:
         print("end")
         p.kill();
+        output_to.flush();
