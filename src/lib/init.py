@@ -89,14 +89,18 @@ def make_list_args_TOM(dict_conf):
         list_args_dir=[ "--output_dir_for_put",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_touch"]),
                         "--output_dir_for_taken",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_release"]),
                         "--output_dir_for_background",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_rawimage"]),
-                        "--workspace_end_filename",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["workspace_end_filename"]),
                         ]
     else:
         list_args_dir=[ "--output_dir_for_put",dict_conf["table_object_manager"]["output_touch"],
                         "--output_dir_for_taken",dict_conf["table_object_manager"]["output_release"],
                         "--output_dir_for_background",dict_conf["table_object_manager"]["output_rawimage"],
-                        "--workspace_end_filename",dict_conf["table_object_manager"]["workspace_end_filename"],
                         ]
+
+    if dict_conf["table_object_manager"]["workspace_end_filename"] != "":
+        if(dict_conf["product_env"]["use_cygpath"]=="1"):
+            list_args_dir = list_args_dir + ["--workspace_end_filename",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["workspace_end_filename"]),]
+        else:
+            list_args_dir = list_args_dir + ["--workspace_end_filename",dict_conf["table_object_manager"]["workspace_end_filename"],]
 
     list_args_opt=dict_conf["table_object_manager"]["default_options"].split()
     list_args_TOM=list_args_dir+list_args_opt
@@ -105,10 +109,14 @@ def make_list_args_TOM(dict_conf):
 
 def startTableObjectManager(dict_conf, output_to):
     list_args_TOM=make_list_args_TOM(dict_conf)
+    list_cmd = [dict_conf["table_object_manager"]["path_exec"]] + list_args_TOM
+
+    logger.debug("Exec table_object_manager: " + str(list_cmd))
+
     if(dict_conf["product_env"]["enable_table_object_manager"]=="1"):
         # myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_args_TOM)
         p = subprocess.Popen(
-            [dict_conf["table_object_manager"]["path_exec"]] + list_args_TOM,
+            list_cmd,
             stdout=output_to,
             stderr=subprocess.STDOUT
         )
