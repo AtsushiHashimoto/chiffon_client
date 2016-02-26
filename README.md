@@ -294,7 +294,7 @@ table_object_manager が生成する、背景画像と背景差分画像を出�
 
 * object_region_box_extractor/
   * PUT/
-　　* putobject_0000046_000.png
+    * putobject_0000046_000.png
   * TAKEN/
     * takenobject_0000175_001.png
 
