@@ -43,15 +43,7 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
     bgimage_filename = "bg_" + frame_number.zfill(number_length) + myutils.get_ext(maskedimage_filename)
     bgimage_path=os.path.join(dict_conf["table_object_manager"]["output_rawimage"],bgimage_filename)
 
-    # 縮小済み画像の出力先パス・ファイル名の作成
-    extractor_path=os.path.join(base_dir, dict_conf["object_region_box_extractor"][mode])
-    imgpath_output=os.path.join(extractor_path, maskedimage_filename)
-
-    # 実行
-    list_imgpath=[bgimage_path, filepath_img_masked, imgpath_output]
-    logger.debug(str(list_imgpath))
-    list_opt = list_imgpath + dict_conf["object_region_box_extractor"]["default_options"].split()
-
+    # 背景画像が出力されるのを待つ
     timeout = 0
     while not os.path.exists(bgimage_path):
         time.sleep(1)
@@ -59,11 +51,30 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
             break
         timeout = timeout + 1
 
-    retcode=myutils.callproc_cyg(dict_conf["object_region_box_extractor"]["path_exec"],list_opt)
-    if(retcode == 0):
+    # 縮小済み画像の出力先パス・ファイル名の作成
+    extractor_path=os.path.join(base_dir, dict_conf["object_region_box_extractor"][mode])
+    imgpath_output=os.path.join(extractor_path, maskedimage_filename)
+
+    # 実行
+    list_imgpath=[dict_conf["object_region_box_extractor"]["path_exec"], bgimage_path, filepath_img_masked, imgpath_output]
+    list_cmds = list_imgpath + dict_conf["object_region_box_extractor"]["default_options"].split()
+
+    logger.debug(str(list_cmds))
+
+    p = subprocess.Popen(
+        list_cmds,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    )
+    (stdoutdata, stderrdata) = p.communicate()
+
+    logger.info("Result : " + stdoutdata);
+    # retcode=myutils.callproc_cyg(dict_conf["object_region_box_extractor"]["path_exec"],list_opt)
+    if(int(p.returncode) == 0):
         logger.info("End getUnMaskedImage")
         return imgpath_output
     else :
+        logger.warn("STDERR: " + stderrdata);
         logger.warn("Fail getUnMaskedImage")
         return ""
 
