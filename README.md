@@ -52,6 +52,11 @@ python chiffon_cient.py user_id grouptag [grouptag ...]
    * 複数指定可能
      * 但し最低1つは必要
 
+### 終了方法
+
+コンソール上で Ctrl-C を送ると停止します。
+スクリプトの停止に合わせて Table Object Manager も停止します。
+
 ### 設定ファイルの記述
 
 ```
@@ -62,7 +67,7 @@ output_root=C:\ChiffonClient\ChiffonClient\src\data
 [table_object_manager]
 # TableObjectManagerの絶対パス
 path_exec=C:\ChiffonClient\bin\TableObjectManager.exe
-default_options=-d 0 --gpu_device 0 -v false --input C:\ChiffonClient\TableObjectManager\camA.mp4
+default_options=-d 0 --gpu_device 0 -v false
 # TableObjectManagerによる出力のディレクトリ
 output_rawimage=table_object_manager\raw
 output_touch=table_object_manager\PUT
@@ -292,6 +297,7 @@ table_object_manager が生成する、背景画像と背景差分画像を出�
 　　* putobject_0000046_000.png
   * TAKEN
     * takenobject_0000175_001.png
+
 ### image_feature_extractor
 切り出し済みの画像を用いて、特徴量を CSV 形式で出力する。
 
