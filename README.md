@@ -258,64 +258,64 @@ http://chiffon.mm.media.kyoto-u.ac.jp/receiver?sessionid={sessionid}&string={str
 出力ファイル名は、table_object_manager が出力したファイル名に準じます。
 
 ### ディレクトリ構造
-* data
-   * [SESSION_ID]
-     * chiffon_server
-       * release
-       * touch
-     * image_feature_extractor
-       * release
-       * touch
-     * object_region_box_extractor
-       * PUT
-       * TAKEN
-     * serv4recog
-       * release
-       * touch
-     * table_object_manager
-       * PUT
-       * raw
-       * TAKEN
+* data/
+  * [SESSION_ID]/
+    * chiffon_server/
+      * release/
+      * touch/
+    * image_feature_extractor/
+      * release/
+      * touch/
+    * object_region_box_extractor/
+      * PUT/
+      * TAKEN/
+    * serv4recog/
+      * release/
+      * touch/
+    * table_object_manager/
+      * PUT/
+      * raw/
+      * TAKEN/
 
 ### table_object_manager
 table_object_manager が生成する、背景画像と背景差分画像を出力するディレクトリ。
 
-* table_object_manager
-  * PUT
+* table_object_manager/
+  * PUT/
     * putobject_0000046_000.png - 物を置いた際の差分画像
-  * raw
+  * raw/
     * bg_0000003.png - 背景差分の基準となる背景画像
-  * TAKEN
+  * TAKEN/
     * takenobject_0000175_001.png - 物を取った際の差分画像
   * table_object_manager.log - table_object_manager の出力するログ
 
 ### object_region_box_extractor
 特徴量抽出のために、差分が生じた部分を切り出した画像を出力するディレクトリ。
 
-* object_region_box_extractor
-  * PUT
+* object_region_box_extractor/
+  * PUT/
 　　* putobject_0000046_000.png
-  * TAKEN
+  * TAKEN/
     * takenobject_0000175_001.png
 
 ### image_feature_extractor
 切り出し済みの画像を用いて、特徴量を CSV 形式で出力する。
 
-* image_feature_extractor
-  * release
+* image_feature_extractor/
+  * release/
     * takenobject_0000175_001.csv
-  * touch
+  * touch/
     * putobject_0000046_000.csv
 
 ### serv4recog
 認識用プログラムに特徴量を渡す際の URL + クエリとその結果を保存するディレクトリ。
 url + クエリは .log ファイル、結果は .json ファイルに記載する。
 
-* serv4recog
-  * release
+* serv4recog/
+  * release/
     * takenobject_0000175_001.json
     * takenobject_0000175_001.log
-  * touch
+  * touch/
     * putobject_0000046_000.json
     * putobject_0000046_000.log
 
@@ -323,10 +323,10 @@ url + クエリは .log ファイル、結果は .json ファイルに記載す�
 認識用プログラムから得た結果を Chiffon Server に渡す際の URL + クエリとその結果を保存するディレクトリ。
 url + クエリは .log ファイル、結果は .json ファイルに記載する。
 
-* chiffon_server
-  * release
+* chiffon_server/
+  * release/
     * takenobject_0000175_001.json
     * takenobject_0000175_001.log
-  * touch
+  * touch/
     * putobject_0000046_000.json
     * putobject_0000046_000.log
