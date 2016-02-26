@@ -252,7 +252,13 @@ def sendToChiffon(filepath_img,dict_conf,result_recog, mode):
 
     logger.debug(response.text)
     myutils.output_to_file(output_path, response.text)
-    result=json.loads(response.text)
 
-    if ("status" in result) and (result["status"] == "success"):
-        logger.info("Result from server4recog has been successfully sent to CHIFFON server.")
+    try:
+        result=json.loads(response.text)
+        if ("status" in result) and (result["status"] == "success"):
+            logger.info("Result from server4recog has been successfully sent to CHIFFON server.")
+        else :
+            # TODO error handling
+            pass
+    except ValueError:
+        logger.error("Fail to send to  CHIFFON server.")
