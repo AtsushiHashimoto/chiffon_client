@@ -21,7 +21,7 @@
 * chiffon_client.conf
    * 各種設定を記述したconfファイル
 * logging.conf
-   * ログ出力設定を記述したファイル
+   * ログ出力設定を記述したファイル。chiffon_client.confと同じディレクトリに置く必要がある。
 * s4r_convtable.csv
    * server4recogの認識結果を対応する語彙セットに変換するためのテーブル(csv形式)
 * lib/
