@@ -40,17 +40,25 @@ pip install requests
 スクリプトは以下の様に引数を指定して起動する。
 
 ```
-python chiffon_cient.py user_id grouptag [grouptag ...]
+python chiffon_cient.py chiffon_cient.conf user_id grouptag [grouptag ...]
 ```
 
 指定する引数は以下の通り。
 
+* chiffon_cient.conf
+  * chiffon_cient.confのパス
 * user_id
    * ユーザー名
 * grouptag
    * server4recogへ渡すサンプルに付加するグループタグ
    * 複数指定可能
      * 但し最低1つは必要
+
+#### 例
+
+```
+python chiffon_cient.py C:\ChiffonClient\etc\chiffon_cient.conf chiffon image_feature_extractor_v1
+```
 
 ### 終了方法
 
