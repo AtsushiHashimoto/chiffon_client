@@ -62,19 +62,22 @@ python chiffon_cient.py user_id grouptag [grouptag ...]
 ```
 [chiffon_client]
 # chiffon_clientが利用する全保存先ディレクトリのroot
-output_root=C:\ChiffonClient\ChiffonClient\src\data
+output_root=C:\ChiffonClient\var\output
 
 [table_object_manager]
 # TableObjectManagerの絶対パス
 path_exec=C:\ChiffonClient\bin\TableObjectManager.exe
+# TableObjectManager実行時に渡すオプション引数
 default_options=-d 0 --gpu_device 0 -v false
-# TableObjectManagerによる出力のディレクトリ
+# mp4ファイルを入力とする場合の例:
+# default_options=-d 0 --gpu_device 0 -v false --input C:\ChiffonClient\TableObjectManager\camA.mp4
+# TableObjectManagerによる出力ファイルのディレクトリ
 output_rawimage=table_object_manager\raw
 output_touch=table_object_manager\PUT
 output_release=table_object_manager\TAKEN
 output_log=table_object_manager\table_object_manager.log
-# 作業領域認識用マスク画像のパス
-workspace_end_filename=C:\ChiffonClient\TableObjectManager\workspace_end_cameraA.png
+# 作業領域認識用マスク画像のパス（仕様についてはREADME.mdの「workspace_end_filenameの仕様」に記載）
+workspace_end_filename=C:\ChiffonClient\etc\workspace_end_cameraA.png
 # 画像拡張子一覧
 fileexts=.jpg,.png,.gif,.bmp,.tif
 
@@ -82,15 +85,16 @@ fileexts=.jpg,.png,.gif,.bmp,.tif
 path_exec=C:\ChiffonClient\bin\ExtractObjectBoxRegion.exe
 output_touch=object_region_box_extractor\PUT
 output_release=object_region_box_extractor\TAKEN
-default_options=
-# --bg_color=0:0:0 --min_width 128
+default_options= --bg_color=0:0:0 --min_width 128
 
 [image_feature_extractor]
-# TableObjectManagerの絶対パス
+# 特徴抽出プログラムの絶対パス
 path_exec=C:\ChiffonClient\bin\sample_Mat2VecCNN.exe
+# 特徴抽出プログラムを実行する際に移動するディレクトリ
 working_dir=C:\ChiffonClient\bin\
+# 特徴抽出プログラム実行時に渡すオプション引数
 default_options=-s 256:256 -p C:\ChiffonClient\bin\sample_data\imagenet_val.prototxt -m C:\ChiffonClient\bin\sample_data\bvlc_reference_rcnn_ilsvrc13.caffemodel
-# 特徴抽出プログラムによる出力ディレクトリ
+# 特徴抽出プログラムによる出力ファイルディレクトリ
 output_touch=image_feature_extractor\touch
 output_release=image_feature_extractor\release
 # 拡張子
@@ -109,7 +113,7 @@ output_release=serv4recog\release
 # 拡張子
 logfileext=.log
 fileext=.json
-# 名称変換テーブル
+# objectid変換テーブル(csvファイル)の絶対パス
 path_convtable=C:\ChiffonClient\ChiffonClient\src\s4r_convtable.csv
 
 [chiffon_server]
@@ -118,7 +122,6 @@ path_sessionid=/woz/session_id/
 path_recipe=/woz/recipe/
 path_receiver=/receiver
 port=80
-path=/release
 navigator=object_access
 timestamp=%Y.%m.%d_%H.%M.%S.%f
 # 結果保存用ディレクトリ
@@ -174,7 +177,9 @@ TableObjectManagerはスクリプト内部で呼び出しされる。実行フ�
 
 設定ファイルの `[table_object_manager] workspace_end_filename` パラメータで指定できる。
 
-この画像は以下の要件で作成する。
+### workspace_end_filenameの仕様
+
+以下の要件で作成した画像ファイルを指定する。
 
 * 使用するカメラの 1/4 の画像を使用する。
   * 例) カメラが 480x640 の場合、120x160
