@@ -54,7 +54,7 @@ class RawfileHandler(FileSystemEventHandler):
         if myutils.get_ext(event.src_path) in self.dict_conf["table_object_manager"]["fileexts"]:
             sys.stdout.write("\rBackground No. %i\r" % self.i)
             sys.stdout.flush()
-            self.i = self.i + 1;
+            self.i = self.i + 1
 
 def makeNewThreads(dict_conf):
     event_handler=ChangeHandler(dict_conf)

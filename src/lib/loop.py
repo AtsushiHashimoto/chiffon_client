@@ -68,13 +68,13 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
     )
     (stdoutdata, stderrdata) = p.communicate()
 
-    logger.info("Result : " + stdoutdata);
+    logger.info("Result : " + stdoutdata)
     # retcode=myutils.callproc_cyg(dict_conf["object_region_box_extractor"]["path_exec"],list_opt)
     if(int(p.returncode) == 0):
         logger.info("End getUnMaskedImage")
         return imgpath_output
     else :
-        logger.warn("STDERR: " + stderrdata);
+        logger.warn("STDERR: " + stderrdata)
         logger.warn("Fail getUnMaskedImage")
         return ""
 
