@@ -22,15 +22,16 @@ LIST_NAME_DIR_EXEC={
 
 def parse_args():
     parser_args=argparse.ArgumentParser("CHIFFONに用いられる各モジュールの連携用スクリプト")
+    parser_args.add_argument("config_file_path",help="chiffon_client.conf")
     parser_args.add_argument("user_id",help="CHIFFONのユーザー名")
     parser_args.add_argument("grouptag",nargs="+",help="サンプルに付加するグループタグ")
     args_client=parser_args.parse_args()
     return vars(parser_args.parse_args())
 
 
-def loadSettings(path_conf):
+def loadSettings():
     dict_conf=parse_args()
-    dict_conf_file=myutils.make_dict_conf(path_conf)
+    dict_conf_file=myutils.make_dict_conf(dict_conf["config_file_path"])
     dict_conf.update(dict_conf_file)
 
     dict_conf["table_object_manager"]["fileexts"]=dict_conf["table_object_manager"]["fileexts"].split(",")

@@ -1,23 +1,32 @@
 # -*- coding:utf-8 -*-
 import logging
 import logging.config
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger("ChiffonClient")
-logging.getLogger("requests").setLevel(logging.WARNING)
-
 import lib.init
 import lib.thread
+import lib.myutils
 import os
+import sys
 
 if __name__=="__main__":
-
-
-    PATH_CONFIG_CLIENT="chiffon_client.conf"
-
     # 設定用の辞書を作成(引数,設定ファイル)
     # このとき拡張子の組の文字列をリストに変換
-    dict_conf=lib.init.loadSettings(PATH_CONFIG_CLIENT)
+    dict_conf=lib.init.loadSettings()
+    logging_conf_path = os.path.join(os.path.dirname(os.path.abspath(dict_conf["config_file_path"])), "logging.conf")
+
+    # session_idの取得
     dict_conf["session_id"],dict_conf["recipe_id"]=lib.init.getChiffonId(dict_conf)
+    sys.stdout.write("session_id: " + dict_conf["session_id"] + os.linesep)
+    sys.stdout.write("recipe_id: " + dict_conf["recipe_id"] + os.linesep)
+
+    # output_rootに移動
+    work_directory = os.path.join(dict_conf["chiffon_client"]["output_root"], dict_conf["session_id"])
+    lib.myutils.makedirs_ex(work_directory)
+    os.chdir(work_directory)
+
+    # ロガーのセットアップ
+    logging.config.fileConfig(logging_conf_path)
+    logger = logging.getLogger("ChiffonClient")
+    logging.getLogger("requests").setLevel(logging.WARNING)
 
     # ディレクトリ作成(TableObjectManager,FeatureExtractorに用いる)
     # 同時に辞書のデータ保存ディレクトリの値を絶対パスに更新
@@ -36,6 +45,6 @@ if __name__=="__main__":
         pass
     finally:
         logger.info("End")
-        p.kill();
-        output_to.flush();
-        output_to.close();
+        p.kill()
+        output_to.flush()
+        output_to.close()
