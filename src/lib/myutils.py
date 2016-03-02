@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+import logging
 import ConfigParser
 import urllib2
 import xml.etree.ElementTree
@@ -8,8 +10,7 @@ import subprocess
 import datetime
 import glob
 
-import logging
-logger = logging.getLogger("ChiffonClient")
+# このモジュールでは logger のセットアップはしないこと。chifon_client.py を参照
 
 def make_dict_conf(path_conf):
     dict_conf={}
@@ -81,6 +82,7 @@ def get_ext(filename):
 def makedirs_ex(path_dir):
     if not os.path.isdir(path_dir):
         os.makedirs(path_dir)
+        logger = logging.getLogger()
         logger.info("Create directory: {path_dir}".format(path_dir=path_dir))
 
 def output_to_file(path, content):
@@ -88,6 +90,7 @@ def output_to_file(path, content):
         f = open(path, 'w')
         f.write(content)
     except IOError:
+        logger = logging.getLogger()
         logger.error('"%s" cannot be opened.' % path)
     finally:
         f.close()

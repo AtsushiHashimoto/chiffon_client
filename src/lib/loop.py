@@ -11,7 +11,8 @@ import locale
 import time
 
 import logging
-logger = logging.getLogger("ChiffonClient")
+
+logger = logging.getLogger()
 
 # 縮小済みの画像(256*256)を取得
 # Put + 1 => bg の番号
@@ -21,6 +22,12 @@ logger = logging.getLogger("ChiffonClient")
 # コマンド実行のサンプル
 # ExtractObjectBoxRegion.exe ..\bg_0002837.png ..\putobject_0002836_027.png ..\output.png
 def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
+
+
+#    import inspect
+    #from pprint import pprint
+    #pprint(inspect.getmembers(logger))
+
     logger.info("Start getUnMaskedImage")
 
     # %output_root%\%SESSION_ID%
@@ -81,6 +88,8 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
 # 取得した画像を特徴抽出プログラムに渡して実行
 
 def make_results_FE(filepath_img,dict_conf, mode):
+    logger = logging.getLogger()
+
     path_exec = dict_conf["image_feature_extractor"]["path_exec"]
 
     if(dict_conf["product_env"]["use_cygpath"]=="1"):
@@ -129,6 +138,8 @@ def make_results_FE(filepath_img,dict_conf, mode):
 # 特徴量の抽出
 # 特徴量を抽出する別実行ファイルの制約で、一時別のカレントディレクトリに移動する処理がある。
 def featureExtraction(filepath_img,dict_conf, mode):
+    logger = logging.getLogger()
+
     logger.info("Start featureExtraction")
     cwd = os.getcwd()
 
@@ -147,6 +158,8 @@ def featureExtraction(filepath_img,dict_conf, mode):
 
 # 得た特徴をserver4recogにHTTPで渡す
 def make_dict_query_s4r(filepath_img,feature_extracted,dict_conf):
+    logger = logging.getLogger()
+
     query_id=dict_conf["session_id"] + "-" + os.path.basename(filepath_img)
     list_group=[dict_conf["user_id"],dict_conf["recipe_id"],dict_conf["session_id"],dict_conf["image_feature_extractor"]["default_group"]]+dict_conf["grouptag"]
 
@@ -159,12 +172,16 @@ def make_dict_query_s4r(filepath_img,feature_extracted,dict_conf):
 
 
 def make_url_server4recog(filepath_img,feature_extracted,dict_conf):
+    logger = logging.getLogger()
+
     dict_query=make_dict_query_s4r(filepath_img,feature_extracted,dict_conf)
     url_recog=myutils.get_url_request(dict_conf["serv4recog"]["host"],dict_conf["serv4recog"]["port"],[dict_conf["serv4recog"]["path"]],dict_query)
     return url_recog
 
 
 def sendToServer4recog(filepath_img,dict_conf,result_feature, mode):
+    logger = logging.getLogger()
+
     #if(dict_conf["product_env"]["is_product"]=="1"):
     #    with open(filepath_output) as f:
     #        feature_extracted=f.open()
@@ -211,12 +228,16 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature, mode):
 
 # 認識結果をCHIFFONにHTTPで渡す
 def convert_recjson_to_idjson(recog_name,dict_conf):
+    logger = logging.getLogger()
+
     if recog_name in dict_conf["serv4recog"]["convtable"]:
         return dict_conf["serv4recog"]["convtable"][recog_name]
     else :
         return recog_name
 
 def make_dict_query_ch(filepath_img,result_recog,dict_conf):
+    logger = logging.getLogger()
+
     dir_img=os.path.dirname(filepath_img)
     timestamp=myutils.get_time_stamp(dict_conf["chiffon_server"]["timestamp"])
     dict_string={"navigator":dict_conf["chiffon_server"]["navigator"],"action":{"target":result_recog,"name":dir_img,"timestamp":timestamp}}
@@ -224,11 +245,15 @@ def make_dict_query_ch(filepath_img,result_recog,dict_conf):
     return dict_query
 
 def make_url_chiffon(filepath_img,result_recog,dict_conf):
+    logger = logging.getLogger()
+
     dict_query=make_dict_query_ch(filepath_img,result_recog,dict_conf)
     url_chiffon=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_receiver"]],dict_query)
     return url_chiffon
 
 def sendToChiffon(filepath_img,dict_conf,result_recog, mode):
+    logger = logging.getLogger()
+
     # dict_recog=convert_recjson_to_idjson(result_recog,dict_conf)
     # url_chiffon=make_url_chiffon(filepath_img,dict_recog,dict_conf)
 

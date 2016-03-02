@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+import logging
+logger = logging.getLogger()
+
 import loop
 import myutils
 
@@ -8,9 +11,6 @@ import multiprocessing
 import time
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
-
-import logging
-logger = logging.getLogger("ChiffonClient")
 
 DIRNAME_LIST=["output_touch","output_release"]
 
@@ -27,6 +27,8 @@ class ChangeHandler(FileSystemEventHandler):
         self.dict_conf=dict_conf
 
     def on_created(self, event):
+        logger = logging.getLogger()
+
         if event.is_directory:
             return
         if myutils.get_ext(event.src_path) in self.dict_conf["table_object_manager"]["fileexts"]:

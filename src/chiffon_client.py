@@ -2,10 +2,10 @@
 import logging
 import logging.config
 import lib.init
-import lib.thread
-import lib.myutils
 import os
 import sys
+
+from vendor import multiprocessing_logging
 
 if __name__=="__main__":
     # 設定用の辞書を作成(引数,設定ファイル)
@@ -15,18 +15,34 @@ if __name__=="__main__":
 
     # session_idの取得
     dict_conf["session_id"],dict_conf["recipe_id"]=lib.init.getChiffonId(dict_conf)
-    sys.stdout.write("session_id: " + dict_conf["session_id"] + os.linesep)
-    sys.stdout.write("recipe_id: " + dict_conf["recipe_id"] + os.linesep)
 
     # output_rootに移動
     work_directory = os.path.join(dict_conf["chiffon_client"]["output_root"], dict_conf["session_id"])
-    lib.myutils.makedirs_ex(work_directory)
+    if not os.path.isdir(work_directory):
+        os.makedirs(work_directory)
     os.chdir(work_directory)
 
     # ロガーのセットアップ
-    logging.config.fileConfig(logging_conf_path)
-    logger = logging.getLogger("ChiffonClient")
+    logging.config.fileConfig(logging_conf_path, None, False)
+    # print(logger.handlers)
+    multiprocessing_logging.install_mp_handler()
+
+    logger = logging.getLogger()
+    print(logger.handlers)
+
     logging.getLogger("requests").setLevel(logging.WARNING)
+
+    # この行以前に、logging.getLogger() が呼ばれると、ロガーの設定が上書きできない。
+    # 特に、モジュールの先頭で logger の初期化をする際は注意。
+
+    # ロガーで出力するために、インポートするタイミングをずらしている。
+    import lib.loop
+    import lib.thread
+    import lib.myutils
+    import lib.TableObjectManager
+
+    logger.info("session_id: {session_id}".format(session_id=dict_conf["session_id"]))
+    logger.info("recipe_id: {recipe_id}".format(recipe_id=dict_conf["recipe_id"]))
 
     # ディレクトリ作成(TableObjectManager,FeatureExtractorに用いる)
     # 同時に辞書のデータ保存ディレクトリの値を絶対パスに更新
@@ -35,7 +51,7 @@ if __name__=="__main__":
     log_file_path = os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"],dict_conf['table_object_manager']['output_log'])
     output_to = open(log_file_path, 'w')
     # TableObjectManager起動
-    p = lib.init.startTableObjectManager(dict_conf, output_to)
+    p = lib.TableObjectManager.startTableObjectManager(dict_conf, output_to)
     logger.info("Table Object Manager is started.")
 
     # ループ(画像取得->スレッド作成)

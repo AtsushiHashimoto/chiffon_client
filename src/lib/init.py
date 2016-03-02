@@ -6,8 +6,7 @@ import os
 import csv
 import subprocess
 
-import logging
-logger = logging.getLogger("ChiffonClient")
+# このモジュールでは logger のセットアップはしないこと。chifon_client.py を参照。
 
 LIST_NAME_DIR_EXEC={
     "table_object_manager":["output_touch","output_release","output_rawimage"],
@@ -52,14 +51,12 @@ def loadSettings():
 def get_sessionid(dict_conf):
     url_session=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_sessionid"],dict_conf["user_id"]])
     session_id=myutils.get_session_id(url_session)
-    logger.info("session_id: {session_id}".format(session_id=session_id))
     return session_id
 
 
 def get_recipeid(dict_conf,session_id):
     url_recipe=myutils.get_url_request(dict_conf["chiffon_server"]["host"],dict_conf["chiffon_server"]["port"],[dict_conf["chiffon_server"]["path_recipe"],session_id])
     recipe_id=myutils.get_recipe_id(url_recipe)
-    logger.info("recipe_id: {recipe_id}".format(recipe_id=recipe_id))
     return recipe_id
 
 
@@ -80,46 +77,3 @@ def makeImageDir(dict_conf):
             abspath_dir=os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"],dict_conf[name_dir_exec][name_dir_out])
             myutils.makedirs_ex(abspath_dir)
             dict_conf[name_dir_exec][name_dir_out]=abspath_dir
-
-
-
-# TableObjectManager起動
-
-def make_list_args_TOM(dict_conf):
-    if(dict_conf["product_env"]["use_cygpath"]=="1"):
-        list_args_dir=[ "--output_dir_for_put",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_touch"]),
-                        "--output_dir_for_taken",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_release"]),
-                        "--output_dir_for_background",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["output_rawimage"]),
-                        ]
-    else:
-        list_args_dir=[ "--output_dir_for_put",dict_conf["table_object_manager"]["output_touch"],
-                        "--output_dir_for_taken",dict_conf["table_object_manager"]["output_release"],
-                        "--output_dir_for_background",dict_conf["table_object_manager"]["output_rawimage"],
-                        ]
-
-    if dict_conf["table_object_manager"]["workspace_end_filename"] != "":
-        if(dict_conf["product_env"]["use_cygpath"]=="1"):
-            list_args_dir = list_args_dir + ["--workspace_end_filename",myutils.convert_to_cygpath(dict_conf["table_object_manager"]["workspace_end_filename"]),]
-        else:
-            list_args_dir = list_args_dir + ["--workspace_end_filename",dict_conf["table_object_manager"]["workspace_end_filename"],]
-
-    list_args_opt=dict_conf["table_object_manager"]["default_options"].split()
-    list_args_TOM=list_args_dir+list_args_opt
-    return list_args_TOM
-
-
-def startTableObjectManager(dict_conf, output_to):
-    list_args_TOM=make_list_args_TOM(dict_conf)
-    list_cmd = [dict_conf["table_object_manager"]["path_exec"]] + list_args_TOM
-
-    logger.debug("Exec table_object_manager: " + str(list_cmd))
-
-    if(dict_conf["product_env"]["enable_table_object_manager"]=="1"):
-        # myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_args_TOM)
-        p = subprocess.Popen(
-            list_cmd,
-            stdout=output_to,
-            stderr=subprocess.STDOUT
-        )
-
-    return p
