@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 import logging
-logger = logging.getLogger()
 
 import loop
 import myutils
@@ -16,6 +15,12 @@ DIRNAME_LIST=["output_touch","output_release"]
 
 
 def process_loop(filepath_img_masked,dict_conf, mode):
+    # 子プロセスでロガーを再度セットアップする
+    logging.config.fileConfig(dict_conf["logging_conf_path"])
+    logger = logging.getLogger()
+    print(logger.handlers)
+    logger.info("process_loop")
+
     filepath_img=loop.getUnMaskedImage(filepath_img_masked,dict_conf, mode)
     result_feature=loop.featureExtraction(filepath_img,dict_conf, mode)
     result_recog=loop.sendToServer4recog(filepath_img,dict_conf,result_feature, mode)
@@ -41,6 +46,8 @@ class ChangeHandler(FileSystemEventHandler):
                 mode = "output_release"
             else :
                 raise OnError("Illegal Path:" + file_abspath_img)
+
+            logger.info("mode is " + mode)
 
             proc_loop=multiprocessing.Process(target=process_loop,args=(event.src_path,self.dict_conf, mode))
             proc_loop.start()
