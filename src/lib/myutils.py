@@ -10,7 +10,13 @@ import subprocess
 import datetime
 import glob
 
-# このモジュールでは logger のセットアップはしないこと。chifon_client.py を参照
+def setup_child_process_logger(logger):
+    logger.setLevel(logging.DEBUG)
+
+    logger.handlers = []
+    socketHandler = logging.handlers.SocketHandler('localhost',
+                                                   logging.handlers.DEFAULT_TCP_LOGGING_PORT)
+    logger.addHandler(socketHandler)
 
 def make_dict_conf(path_conf):
     dict_conf={}

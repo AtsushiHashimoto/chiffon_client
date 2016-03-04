@@ -15,11 +15,8 @@ DIRNAME_LIST=["output_touch","output_release"]
 
 
 def process_loop(filepath_img_masked,dict_conf, mode):
-    # 子プロセスでロガーを再度セットアップする
-    logging.config.fileConfig(dict_conf["logging_conf_path"])
     logger = logging.getLogger()
-    print(logger.handlers)
-    logger.info("process_loop")
+    myutils.setup_child_process_logger(logger)
 
     filepath_img=loop.getUnMaskedImage(filepath_img_masked,dict_conf, mode)
     result_feature=loop.featureExtraction(filepath_img,dict_conf, mode)
@@ -66,6 +63,8 @@ class RawfileHandler(FileSystemEventHandler):
             self.i = self.i + 1
 
 def makeNewThreads(dict_conf):
+    logger = logging.getLogger()
+
     event_handler=ChangeHandler(dict_conf)
     observer_release=Observer()
     for dirname in DIRNAME_LIST:
@@ -80,4 +79,5 @@ def makeNewThreads(dict_conf):
             time.sleep(1)
     except KeyboardInterrupt:
         observer_release.stop()
+        logger.info("observer_release is stopped.")
     observer_release.join()
