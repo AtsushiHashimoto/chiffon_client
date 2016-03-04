@@ -1,15 +1,14 @@
 # -*- coding:utf-8 -*-
 import logging
 import logging.config
+import multiprocessing
+import os
+import sys
 import lib.init
 import lib.thread
 import lib.myutils
 import lib.table_object_manager
 from lib.log_record_socket_receiver import LogRecordSocketReceiver
-import os
-import sys
-from vendor import multiprocessing_logging
-import multiprocessing
 
 def process_main(dict_conf):
     logger = logging.getLogger()
