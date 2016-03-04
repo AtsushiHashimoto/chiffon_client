@@ -85,7 +85,8 @@ output_touch=table_object_manager\PUT
 output_release=table_object_manager\TAKEN
 output_log=table_object_manager\table_object_manager.log
 # 作業領域認識用マスク画像のパス（仕様についてはREADME.mdの「workspace_end_filenameの仕様」に記載）
-workspace_end_filename=C:\ChiffonClient\etc\workspace_end_cameraA.png
+workspace_end_filename=
+# workspace_end_filename=C:\ChiffonClient\etc\workspace_end_cameraA.png
 # 画像拡張子一覧
 fileexts=.jpg,.png,.gif,.bmp,.tif
 
@@ -93,7 +94,7 @@ fileexts=.jpg,.png,.gif,.bmp,.tif
 path_exec=C:\ChiffonClient\bin\ExtractObjectBoxRegion.exe
 output_touch=object_region_box_extractor\PUT
 output_release=object_region_box_extractor\TAKEN
-default_options= --bg_color=0:0:0 --min_width 128
+default_options= --min_width 128
 
 [image_feature_extractor]
 # 特徴抽出プログラムの絶対パス
