@@ -4,9 +4,11 @@ import logging.config
 import multiprocessing
 import os
 import sys
+import requests
 import lib.init
 import lib.thread
 import lib.myutils
+import lib.loop
 import lib.table_object_manager
 from lib.log_record_socket_receiver import LogRecordSocketReceiver
 
@@ -21,6 +23,16 @@ def process_main(dict_conf):
     # ディレクトリ作成(TableObjectManager,FeatureExtractorに用いる)
     # 同時に辞書のデータ保存ディレクトリの値を絶対パスに更新
     lib.init.makeImageDir(dict_conf)
+
+    url_recog="http://{domain}:{port}{path}".format(domain=dict_conf["serv4recog"]["host"],port=dict_conf["serv4recog"]["port"],path=dict_conf["serv4recog"]["path"])
+    filepath_img = 'dummy.log'
+    result_feature = "0, 0, 0";
+    dict_query=lib.loop.make_dict_query_s4r(filepath_img,result_feature,dict_conf)
+    response = requests.get(url_recog,params=dict_query)
+
+    logger.info("Send dummy data to server4recog");
+    logger.info("URL(server4recog): "+url_recog)
+    logger.debug("Query(server4recog): " + str(dict_query))
 
     log_file_path = os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"],dict_conf['table_object_manager']['output_log'])
     output_to = open(log_file_path, 'w')
