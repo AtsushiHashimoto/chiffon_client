@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import myutils
 
+import glob
 import os
 import json
 import re
@@ -22,11 +23,9 @@ import logging
 def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
     logger = logging.getLogger()
 
-#    import inspect
-    #from pprint import pprint
-    #pprint(inspect.getmembers(logger))
-
     logger.info("Start getUnMaskedImage")
+
+    logger.debug("target file name : " + filepath_img_masked);
 
     # %output_root%\%SESSION_ID%
     base_dir = os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"])
@@ -35,6 +34,7 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
     maskedimage_filename = os.path.basename(filepath_img_masked)
     pattern=re.compile("(_[0-9]+_)")
     frame_number_astext = pattern.search(maskedimage_filename).group(1)[1:-1]
+    logger.info("frame No." + frame_number_astext)
     number_length = len(frame_number_astext)
 
     if mode == "output_touch":
@@ -45,13 +45,19 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
         frame_gap = -1
     frame_number = str(int(frame_number_astext) + frame_gap)
 
-    bgimage_filename = "bg_" + frame_number.zfill(number_length) + myutils.get_ext(maskedimage_filename)
-    bgimage_path=os.path.join(dict_conf["table_object_manager"]["output_rawimage"],bgimage_filename)
+    bgimage_filename = "bg_" + frame_number.zfill(number_length) + "*" + myutils.get_ext(maskedimage_filename)
+    search_path=os.path.join(dict_conf["table_object_manager"]["output_rawimage"],bgimage_filename)
+    search_path=search_path.replace("\\", "/");
+    logger.debug("search query: " + search_path)
+
+    bgimage_path = ''
 
     # 背景画像が出力されるのを待つ
     timeout = 0
     while not os.path.exists(bgimage_path):
         time.sleep(1)
+        bgimage_path = glob.glob(search_path)[0]
+        logger.info("find : " + bgimage_path)
         if timeout > 10:
             break
         timeout = timeout + 1
