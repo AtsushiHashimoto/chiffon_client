@@ -60,14 +60,6 @@ if __name__=="__main__":
     dict_conf=lib.init.loadSettings()
     logging_conf_path = os.path.join(os.path.dirname(os.path.abspath(dict_conf["config_file_path"])), "logging.conf")
 
-    path = "/woz/" + dict_conf["user_id"] + "/0/"
-    init_url = "http://{domain}:{port}{path}".format(domain=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path=path)
-    print(init_url)
-    try:
-        response = requests.get(init_url, timeout=5.0)
-    except requests.exceptions.RequestException:
-        print("Cannot connect to chiffon_server")
-
     # session_idの取得
     dict_conf["session_id"],dict_conf["recipe_id"]=lib.init.getChiffonId(dict_conf)
 
