@@ -5,7 +5,7 @@ import glob
 import os
 import json
 import re
-import requests
+    import requests
 import subprocess
 import datetime
 import locale
@@ -79,7 +79,6 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
             stderr=subprocess.STDOUT
             )
         (stdoutdata, stderrdata) = p.communicate()
-        raise subprocess.CalledProcessError()
     except subprocess.CalledProcessError as e:
         logger.critical("({0}): {1}".format(e.returncode, e.output))
     except OSError as e:
@@ -220,7 +219,11 @@ def sendToServer4recog(filepath_img,dict_conf,result_feature, mode):
     # myutils.output_to_file(log_output_path, "[%s] %s %s" % (logtime, url_recog, dict_query))
 
     if(dict_conf["product_env"]["enable_server4recog"]=="1"):
-        response = requests.get(url_recog,params=dict_query)
+        try:
+            response = requests.get(url_recog,params=dict_query)
+        except requests.exceptions.RequestException:
+            logger.error("Fail to send data to server4recog")
+
         myutils.output_to_file(log_output_path, "%s" % response.url)
 
         logger.debug(response.text)
@@ -288,7 +291,11 @@ def sendToChiffon(filepath_img,dict_conf,result_recog, mode):
     url = "http://{domain}:{port}{path}".format(domain=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path=dict_conf["chiffon_server"]["path_receiver"])
     logger.info("URL(chiffon): "+url)
     logger.debug("Query(chiffon): "+str(dict_query))
-    response = requests.get(url,params=dict_query)
+    try:
+        response = requests.get(url,params=dict_query)
+    except requests.exceptions.RequestException:
+        logger.error("Fail to send data to server4recog")
+
     myutils.output_to_file(log_output_path, "%s" % response.url)
 
     logger.debug(response.text)

@@ -26,13 +26,16 @@ def process_main(dict_conf):
 
     url_recog="http://{domain}:{port}{path}".format(domain=dict_conf["serv4recog"]["host"],port=dict_conf["serv4recog"]["port"],path=dict_conf["serv4recog"]["path"])
     filepath_img = 'dummy.log'
-    result_feature = "0, 0, 0";
+    result_feature = "0, 0, 0"
     dict_query=lib.loop.make_dict_query_s4r(filepath_img,result_feature,dict_conf)
-    response = requests.get(url_recog,params=dict_query)
-
-    logger.info("Send dummy data to server4recog");
     logger.info("URL(server4recog): "+url_recog)
     logger.debug("Query(server4recog): " + str(dict_query))
+    
+    try:
+        response = requests.get(url_recog,params=dict_query)
+        logger.info("Send dummy data to server4recog")
+    except requests.exceptions.RequestException:
+        logger.error("Fail to send dummy data to server4recog")
 
     log_file_path = os.path.join(dict_conf["chiffon_client"]["output_root"],dict_conf["session_id"],dict_conf['table_object_manager']['output_log'])
     output_to = open(log_file_path, 'w')

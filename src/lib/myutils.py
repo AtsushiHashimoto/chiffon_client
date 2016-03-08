@@ -39,19 +39,26 @@ def get_url_request(domain,port,list_path,dict_query=[]):
     return "http://{domain}:{port}{path}{query}".format(domain=domain,port=port,path=path,query=query)
 
 def get_http_result(url):
-    result=urllib2.urlopen(url)
-    return result
+    try:
+        result=urllib2.urlopen(url)
+        return result
+    except urllib2.HTTPError as e:
+        print("HTTP Error ({0}): {1}".format(e.code, e.reason))
 
 def get_session_id(url):
     result=get_http_result(url)
-    return result.readline().rstrip("\n")
+    if result:
+        return result.readline().rstrip("\n")
+    else :
+        return ''
 
 def get_recipe_id(url):
     result=get_http_result(url)
-    elem_root=xml.etree.ElementTree.fromstring(result.read())
-    return elem_root.attrib["id"]
-
-
+    if result:
+        elem_root=xml.etree.ElementTree.fromstring(result.read())
+        return elem_root.attrib["id"]
+    else :
+        return ''
 
 def convert_to_cygpath(path):
     return subprocess.call(["cygpath","-w",path])
