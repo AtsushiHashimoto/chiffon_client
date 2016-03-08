@@ -63,6 +63,14 @@ if __name__=="__main__":
     # session_idの取得
     dict_conf["session_id"],dict_conf["recipe_id"]=lib.init.getChiffonId(dict_conf)
 
+    if not dict_conf["session_id"]:
+        print("Fail to retrieve session_id from chiffon_server")
+        exit();
+
+    if not dict_conf["recipe_id"]:
+        print("Fail to retrieve recipe_id from chiffon_server")
+        exit();
+
     # output_rootに移動
     work_directory = os.path.join(dict_conf["chiffon_client"]["output_root"], dict_conf["session_id"])
     if not os.path.isdir(work_directory):
