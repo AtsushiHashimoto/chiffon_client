@@ -30,7 +30,7 @@ def process_main(dict_conf):
     dict_query=lib.loop.make_dict_query_s4r(filepath_img,result_feature,dict_conf)
     logger.info("URL(server4recog): "+url_recog)
     logger.debug("Query(server4recog): " + str(dict_query))
-    
+
     try:
         response = requests.get(url_recog,params=dict_query)
         logger.info("Send dummy data to server4recog")
@@ -59,6 +59,14 @@ if __name__=="__main__":
     # このとき拡張子の組の文字列をリストに変換
     dict_conf=lib.init.loadSettings()
     logging_conf_path = os.path.join(os.path.dirname(os.path.abspath(dict_conf["config_file_path"])), "logging.conf")
+
+    path = "/woz/" + dict_conf["user_id"] + "/0/"
+    init_url = "http://{domain}:{port}{path}".format(domain=dict_conf["chiffon_server"]["host"],port=dict_conf["chiffon_server"]["port"],path=path)
+    print(init_url)
+    try:
+        response = requests.get(init_url, timeout=5.0)
+    except requests.exceptions.RequestException:
+        print("Cannot connect to chiffon_server")
 
     # session_idの取得
     dict_conf["session_id"],dict_conf["recipe_id"]=lib.init.getChiffonId(dict_conf)

@@ -5,7 +5,7 @@ import glob
 import os
 import json
 import re
-    import requests
+import requests
 import subprocess
 import datetime
 import locale
