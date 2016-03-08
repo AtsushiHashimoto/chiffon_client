@@ -79,7 +79,10 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
             stderr=subprocess.STDOUT
             )
         (stdoutdata, stderrdata) = p.communicate()
-    except (OSError, subprocess.CalledProcessError) as e:
+        raise subprocess.CalledProcessError()
+    except subprocess.CalledProcessError as e:
+        logger.critical("({0}): {1}".format(e.returncode, e.output))
+    except OSError as e:
         logger.critical("({0}): {1}".format(e.errno, e.strerror))
 
     logger.info("Result : " + stdoutdata)
@@ -116,7 +119,9 @@ def make_results_FE(filepath_img,dict_conf, mode):
                 stderr=subprocess.STDOUT
                 )
             (stdoutdata, stderrdata) = p.communicate()
-        except (OSError, subprocess.CalledProcessError) as e:
+        except subprocess.CalledProcessError as e:
+            logger.critical("({0}): {1}".format(e.returncode, e.output))
+        except OSError as e:
             logger.critical("({0}): {1}".format(e.errno, e.strerror))
 
         # stdoutdata = subprocess.check_output(list_cmds)

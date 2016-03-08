@@ -47,7 +47,9 @@ def startTableObjectManager(dict_conf, output_to):
                 stdout=output_to,
                 stderr=subprocess.STDOUT
                 )
-        except (OSError, subprocess.CalledProcessError) as e:
+        except subprocess.CalledProcessError as e:
+            logger.critical("({0}): {1}".format(e.returncode, e.output))
+        except OSError as e:
             logger.critical("({0}): {1}".format(e.errno, e.strerror))
 
     return p
