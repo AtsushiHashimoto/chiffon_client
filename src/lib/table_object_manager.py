@@ -41,10 +41,13 @@ def startTableObjectManager(dict_conf, output_to):
 
     if(dict_conf["product_env"]["enable_table_object_manager"]=="1"):
         # myutils.callproc_cyg(dict_conf["table_object_manager"]["path_exec"],list_args_TOM)
-        p = subprocess.Popen(
-            list_cmd,
-            stdout=output_to,
-            stderr=subprocess.STDOUT
-        )
+        try:
+            p = subprocess.Popen(
+                list_cmd,
+                stdout=output_to,
+                stderr=subprocess.STDOUT
+                )
+        except (OSError, subprocess.CalledProcessError) as e:
+            logger.critical("({0}): {1}".format(e.errno, e.strerror))
 
     return p

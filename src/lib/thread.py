@@ -27,6 +27,7 @@ def process_loop(filepath_img_masked,dict_conf, mode):
 class ChangeHandler(FileSystemEventHandler):
     def __init__(self,dict_conf):
         self.dict_conf=dict_conf
+        self.loop_job_list = []
 
     def on_created(self, event):
         logger = logging.getLogger()
@@ -47,6 +48,7 @@ class ChangeHandler(FileSystemEventHandler):
             logger.info("mode is " + mode)
 
             proc_loop=multiprocessing.Process(target=process_loop,args=(event.src_path,self.dict_conf, mode))
+            self.loop_job_list.append(proc_loop)
             proc_loop.start()
 
 class RawfileHandler(FileSystemEventHandler):
@@ -81,3 +83,6 @@ def makeNewThreads(dict_conf):
         observer_release.stop()
         logger.info("observer_release is stopped.")
     observer_release.join()
+    [j.join() for j in event_handler.loop_job_list]
+
+    logger.info("End all thread");

@@ -72,12 +72,15 @@ def getUnMaskedImage(filepath_img_masked,dict_conf, mode):
 
     logger.debug(str(list_cmds))
 
-    p = subprocess.Popen(
-        list_cmds,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT
-    )
-    (stdoutdata, stderrdata) = p.communicate()
+    try:
+        p = subprocess.Popen(
+            list_cmds,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+            )
+        (stdoutdata, stderrdata) = p.communicate()
+    except (OSError, subprocess.CalledProcessError) as e:
+        logger.critical("({0}): {1}".format(e.errno, e.strerror))
 
     logger.info("Result : " + stdoutdata)
     # retcode=myutils.callproc_cyg(dict_conf["object_region_box_extractor"]["path_exec"],list_opt)
@@ -106,12 +109,15 @@ def make_results_FE(filepath_img,dict_conf, mode):
 
         logger.debug(str(list_cmds))
 
-        p = subprocess.Popen(
-            list_cmds,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
-        )
-        (stdoutdata, stderrdata) = p.communicate()
+        try:
+            p = subprocess.Popen(
+                list_cmds,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+                )
+            (stdoutdata, stderrdata) = p.communicate()
+        except (OSError, subprocess.CalledProcessError) as e:
+            logger.critical("({0}): {1}".format(e.errno, e.strerror))
 
         # stdoutdata = subprocess.check_output(list_cmds)
 
